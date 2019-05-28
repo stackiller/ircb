@@ -17,6 +17,9 @@ typedef struct {
 /* attribute irc data type to irc */
 irc_d irc;
 
+/* priv messages */ 
+void privMsg(char *msg, char *dst);
+
 // get array size
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
 

@@ -1,7 +1,9 @@
 /*
 
-  bbot Main,
+  b0t Main,
   IRC Functions.
+
+  Author: aSynKronus
 
 */
 
