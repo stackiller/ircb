@@ -1,7 +1,7 @@
 /* getNick - get nick from message */
 char *getNick(char msg[]) {
   char msg_clone[strlen(msg)];
-  char *nick = (char*) calloc(512,1); // allocate nick
+  char *nick = (char*) calloc(2024,1); // allocate nick
   char *splitted;
   int i;
 
@@ -21,7 +21,7 @@ char *getNick(char msg[]) {
 /* getChan - get channel from message */
 char *getChan(char msg[]) {
   char msg_clone[strlen(msg)];
-  char *channel = (char*) calloc(512,1); // allocates channel
+  char *channel = (char*) calloc(2024,1); // allocates channel
   char *splitted;
   int i = 0; // auxiliary variable
 
