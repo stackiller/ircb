@@ -7,11 +7,13 @@
 
 /* IRC struct data types */
 typedef struct {
+  int sockfd; // socket file descriptor
   SSL_CTX *ctx; // SSL context pointer
   SSL *ssl; // ssl Descriptor
   char *host, *port; // host and port
   char *nick, *pass; // nick and pass
   char *chans; // channels
+  char *buffer; // buffer for messages
 } irc_d;
 
 /* attribute irc data type to irc */
@@ -24,7 +26,7 @@ void privMsg(char *msg, char *dst);
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
 
 // Sizes
-#define MSG_LEN 3081
+#define MSG_LEN 3084
 
 // Error defines
 #define FAIL -1

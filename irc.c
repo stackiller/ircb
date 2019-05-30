@@ -40,7 +40,8 @@ char *getChan(char msg[]) {
 }
 
 /* getArgument - get argument from message */
-char *getArgument(char msg[]) {
+char *getArgument(char msg[])
+{
   char msg_clone[strlen(msg)];
   char *argument = (char*) calloc((strlen(msg)-2),1);
   char *splitted;
@@ -104,7 +105,7 @@ void setNick() {
   nickLen = (strlen(irc.nick) + 7);
   setNick = calloc(nickLen, sizeof(char));
   // allocates (user)
-  userLen = (strlen(irc.nick) * 4 + 10);
+  userLen = (strlen(irc.nick) * 14 + 10);
   setUser = calloc(userLen, sizeof(char));
 
   // format buffers
@@ -202,53 +203,54 @@ void privMsg(char *msg, char *dst) {
 }
 
 /* readMsg - read data from SSL pointer */
-void readMsg(char *ircMsg) {
-  char msg_line[MSG_LEN];
-  char msg_tmp[MSG_LEN];
-  int bytes;
-  int totalBytes = 0;
+char
+*readMsg()
+{
+  char line[MSG_LEN], *buffer = (char*) malloc(MSG_LEN);
+  int bytes, totalBytes = 0;
 
-  // zeroed buffers
-  memset(ircMsg, 0x0, MSG_LEN);
-  memset(msg_line, 0x0, MSG_LEN);
-  memset(msg_tmp, 0x0, MSG_LEN);
+  /* clear buffers */
+  memset(buffer, 0x0, MSG_LEN);
+  memset(line, 0x0, MSG_LEN);
 
-  // loop for check exist data
-  do {
-    memset(msg_line, 0x0, MSG_LEN); // zeroed buffers
-    bytes = SSL_read(irc.ssl, msg_line, MSG_LEN); // get current bytes
-    if(bytes < 0) {
+  /* fetch data from SSL socket */
+  do
+  {
+    memset(line, 0x0, MSG_LEN); // reset line content
+    bytes = SSL_read(irc.ssl, line, MSG_LEN); // get current bytes
+    if(bytes <= 0) {
       break; // break if erros in read data
-    } else if (bytes == 0) {
-      break; // break if not exist data
     } totalBytes += bytes; // total bytes received
-    strncat(msg_tmp, msg_line, bytes); // concatene lines into buffer_tmp
+    strncat(buffer, line, bytes); // concatene lines into buffer_tmp
   } while(SSL_pending(irc.ssl));
 
-  // add null byte
-  msg_tmp[totalBytes] = '\0';
+  /* indicates the final content string. */
+  buffer[totalBytes] = 0x0;
 
-  char *pingOnMsg = strstr(msg_tmp, "PING "); // ping message
-  char *endMessages = strstr(msg_tmp, "End of"); // end motd
+  char *ping = strstr(buffer, "PING "); // ping message
+  char *end = strstr(buffer, "End of"); // end motd
 
-  if(pingOnMsg != NULL) { sendPong(msg_tmp); } // call the ping function
-  else if(endMessages != NULL) { setJoin(irc.ssl); } // call the join function
+  if(ping != NULL)
+    sendPong(ping); // call the ping function
+  else if(end != NULL)
+    setJoin(irc.ssl); // call the join function
 
-  // get data from message
-  char *userNick = getNick(msg_tmp);
-  char *channel  = getChan(msg_tmp);
-  char *message  = getArgument(msg_tmp);
+  /* get data from message */
+  char *userNick = getNick(buffer);
+  char *channel  = getChan(buffer);
+  char *message  = getArgument(buffer);
 
-  // check if all exist in message
-  if((userNick[0] != '\0' && channel[0] != '\0' && message[0] != '\0')) {
-    printf("[%s] %s: %s", userNick, channel, message);
-  } getCommand(message, channel);
-  strcpy(ircMsg, msg_tmp); // copy message to ircMsg
+  /* check if all exist in message */
+  if((userNick[0] != '\0' && channel[0] != '\0' && message[0] != '\0'))
+    // printf("[%s] %s: %s", userNick, channel, message);
+  getCommand(message, channel);
 
-  // release pointers
+  /* release pointers */
   free(userNick);
   free(channel);
   free(message);
+
+  return buffer; /* return buffer */
 }
 
 /* newCon - open && create socket connection */
