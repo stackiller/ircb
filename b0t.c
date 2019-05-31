@@ -61,8 +61,8 @@ int main(int count, char *args[])
   do
   {
     irc.buffer = NULL; // point pointer to null
-    irc.buffer = readMsg(irc.buffer); // store the read message
-    printf("%s", irc.buffer); // print message
+    irc.buffer = readBf(irc.buffer); // store the read message
+    // printf("%s", irc.buffer); // print message
     free(irc.buffer); // release buffer
   }
   while(1);
