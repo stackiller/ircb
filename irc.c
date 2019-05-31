@@ -1,17 +1,17 @@
 /* getNick - get nick from message */
-char *getNick(char msg[]) {
-  char msg_clone[strlen(msg)];
-  char *nick = (char*) calloc(2024,1); // allocate nick
-  char *splitted;
-  int i;
+char *getNick(char msg[])
+{
+  char _clone[strlen(msg)];
+  char *token, *nick = (char*) calloc(2024,1);
+  int i = 0;
 
   if(msg[0] == ':') {
-    msg_clone[strlen(msg)] = '\0';  // add nullbyte
-    strncpy(msg_clone, msg, strlen(msg)); // copy msg to clone
-    splitted = strtok(msg_clone, "!"); // split the message
-    if(splitted!=NULL) {
-      for(i=0; i < (strlen(splitted)-1); i++) {
-        nick[i] = splitted[i+1]; // copy nick
+    msg[strlen(msg)] = '\0';  // add nullbyte
+    strncpy(_clone, msg, strlen(msg)); // copy msg to clone
+    token = strtok(_clone, "!"); // split the message
+    if(token!=NULL) {
+      for(; i < (strlen(token)-1); i++) {
+        nick[i] = token[i+1]; // copy nick
       } nick[i+1] = '\0'; // add nullbyte
     } else { nick[0] = '\0'; }
   } else { nick[0] = '\0'; }
@@ -19,19 +19,19 @@ char *getNick(char msg[]) {
 }
 
 /* getChan - get channel from message */
-char *getChan(char msg[]) {
-  char msg_clone[strlen(msg)];
-  char *channel = (char*) calloc(2024,1); // allocates channel
-  char *splitted;
+char *getChan(char msg[])
+{
+  char _clone[strlen(msg)];
+  char *sub, *channel = (char*) calloc(2024,1);
   int i = 0; // auxiliary variable
 
   if(msg[0] == ':') {
-    msg_clone[strlen(msg)] = '\0'; // add nullbyte
-    strncpy(msg_clone, msg, strlen(msg)); // copy msg to clone
-    splitted = strchr(msg_clone, '#'); // split the message
-    if(splitted!=NULL) {
-      while(splitted[i] != 32) {
-        channel[i] = splitted[i]; // copy channel
+    msg[strlen(msg)] = '\0'; // add nullbyte
+    strncpy(_clone, msg, strlen(msg)); // copy msg to clone
+    sub = strchr(_clone, '#'); // split the message
+    if(sub!=NULL) {
+      while(sub[i] != 32) {
+        channel[i] = sub[i]; // copy channel
         i++; // increment index
       } channel[i+1] = '\0'; // add nullbyte
     } else { channel[0] = '\0'; }
@@ -42,22 +42,24 @@ char *getChan(char msg[]) {
 /* getArgument - get argument from message */
 char *getArgument(char msg[])
 {
-  char msg_clone[strlen(msg)];
-  char *argument = (char*) calloc((strlen(msg)-2),1);
-  char *splitted;
-  int i;
+  char _clone[strlen(msg)];
+  char *sub, *rtmsg = (char*) calloc(strlen(msg),1);
+  int i = 2;
+
+  memset(_clone, 0x0, strlen(msg));
 
   if(msg[0] == ':') {
-    msg_clone[strlen(msg)] = '\0'; // add nullbyte
-    strncpy(msg_clone, msg, strlen(msg)); // copy msg to clone
-    splitted = strstr(msg_clone, " :"); // get argument in msg
-    if(splitted!=NULL) {
-      for(i=2; i < strlen(splitted); i++) {
-        argument[i-2] = splitted[i];
-      } argument[i-2] = '\0';
-    } else { argument[0] = '\0'; }
-  } else { argument[0] = '\0'; }
-  return(argument); // return nullbyte
+    msg[strlen(msg)] = '\0'; // add nullbyte
+    strncpy(_clone, msg, strlen(msg)); // copy msg to clone
+    sub = strstr(_clone, " :"); // get argument in msg
+    if(sub!=NULL) {
+      while(sub[i] != '\r') {
+        rtmsg[i-2] = sub[i];
+        i++;
+      } rtmsg[i-2] = '\0';
+    } else { rtmsg[0] = '\0'; }
+  } else { rtmsg[0] = '\0'; }
+  return(rtmsg); // return nullbyte
 }
 
 /* commpareStr - compare Strings */
@@ -68,35 +70,40 @@ int compareStr(char *keyword, char *msg) {
   } else { return(0); }
 }
  
-/* getCommand - get command from message */
-void getCommand(char msg[], char channel[]) {
+/* exec - get command from message */
+void
+exec(char msg[], char channel[])
+{
   typedef void (*funcs_c)(char[]); // msg[] ? como argumento
   char strip[(strlen(msg))];
   int i;
   
   // keywords for functions
-  char *keys[] = {
+  char *keys[] =
+  {
     "Brules", "Bregister", "Bidentify",
     "Babout", "Bsay",
   };
   
   // functions of keywords
-  funcs_c funcs[ARRAY_SIZE(keys)] = {
+  funcs_c funcs[ARRAY_SIZE(keys)] =
+  {
     &Brules, &Bregister, &Bidentify,
     &Babout, &Bsay,
   }; strncpy(strip, msg, (strlen(msg)));
-  strip[(strlen(msg))-1] = '\0'; // add nullbyte
-  
+    
   // keywords -> functions
-  for(i=0; i < ARRAY_SIZE(keys); i++) {
-    if(compareStr(keys[i], strip)) {
+  for(i=0; i < ARRAY_SIZE(keys); i++)
+  {
+    if(compareStr(keys[i], strip))
       funcs[i](channel);
-    }
   }
 }
 
 /* setUser - identify user */
-void setNick() {
+void
+setNick()
+{
   // user and ident - buffer & len
   char *setNick, *setUser;
   int nickLen, userLen;
@@ -204,7 +211,7 @@ void privMsg(char *msg, char *dst) {
 
 /* readMsg - read data from SSL pointer */
 char
-*readMsg()
+*readBf()
 {
   char line[MSG_LEN], *buffer = (char*) malloc(MSG_LEN);
   int bytes, totalBytes = 0;
@@ -228,7 +235,7 @@ char
   buffer[totalBytes] = 0x0;
 
   char *ping = strstr(buffer, "PING "); // ping message
-  char *end = strstr(buffer, "End of"); // end motd
+  char *end = strstr(buffer, "End of "); // end motd
 
   if(ping != NULL)
     sendPong(ping); // call the ping function
@@ -242,8 +249,8 @@ char
 
   /* check if all exist in message */
   if((userNick[0] != '\0' && channel[0] != '\0' && message[0] != '\0'))
-    // printf("[%s] %s: %s", userNick, channel, message);
-  getCommand(message, channel);
+    printf("[%s] %s: %s\n", userNick, channel, message);
+  exec(message, channel);
 
   /* release pointers */
   free(userNick);
