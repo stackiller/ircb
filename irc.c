@@ -1,5 +1,5 @@
 /* getNick - get nick from message */
-char *getNick(char msg[])
+char *getnick(char msg[])
 {
   char _clone[strlen(msg)];
   char *token, *nick = (char*) calloc(2024,1);
@@ -19,7 +19,7 @@ char *getNick(char msg[])
 }
 
 /* getChan - get channel from message */
-char *getChan(char msg[])
+char *getchan(char msg[])
 {
   char _clone[strlen(msg)];
   char *sub, *channel = (char*) calloc(2024,1);
@@ -40,10 +40,10 @@ char *getChan(char msg[])
 }
 
 /* getArgument - get argument from message */
-char *getArgument(char msg[])
+char *getmsg(char msg[])
 {
   char _clone[strlen(msg)];
-  char *sub, *rtmsg = (char*) calloc(strlen(msg),1);
+  char *sub, *sub2, *rtmsg = (char*) calloc(strlen(msg),1);
   int i = 2;
 
   memset(_clone, 0x0, strlen(msg));
@@ -63,11 +63,14 @@ char *getArgument(char msg[])
 }
 
 /* commpareStr - compare Strings */
-int compareStr(char *keyword, char *msg) {
+int
+compareStr(char *keyword, char *msg)
+{
   int keyword_len = strlen(keyword);
-  if(strncmp(msg, keyword, keyword_len) == 0) {
+  if(strncmp(msg, keyword, keyword_len) == 0)
     return(1);
-  } else { return(0); }
+  else
+    return(0);
 }
  
 /* exec - get command from message */
@@ -130,7 +133,8 @@ setNick()
 }
 
 /* setCreds - set credentials of user */
-void setCreds() {
+void setCreds()
+{
   char *setCreds; // credentials buffer
   int credsLen; // credentials len
   
@@ -149,7 +153,8 @@ void setCreds() {
 }
 
 /* setJoin - join channel */
-void setJoin() {
+void setJoin()
+{
   char *setJoin; // join buffer
   int join_len; // size of join command
 
@@ -165,13 +170,16 @@ void setJoin() {
 }
 
 /* sendPong - send Pong response */
-int sendPong(char *pingOnMsg) {
+int
+sendPong(char *pingOnMsg)
+{
   int index = 5; // index of pong array
   int pong_len = 0; // pong lenght
   char *pong; // pong response message
 
   // calculate size of ping message
-  while(pingOnMsg[index] != '\n' && pingOnMsg[index] != 32) {
+  while(pingOnMsg[index] != '\n' && pingOnMsg[index] != 32)
+  {
     pong_len++; // increment size of pong_len
     index++; // increment index
   }
@@ -195,7 +203,8 @@ int sendPong(char *pingOnMsg) {
 }
 
 /* privMsg - writer on SSL pointer */
-void privMsg(char *msg, char *dst) {
+void privMsg(char *msg, char *dst)
+{
   char *msg_tmp; // tmp message
   int msg_len; // size of message
 
@@ -243,19 +252,17 @@ char
     setJoin(irc.ssl); // call the join function
 
   /* get data from message */
-  char *userNick = getNick(buffer);
-  char *channel  = getChan(buffer);
-  char *message  = getArgument(buffer);
+  char *nick     = getnick(buffer);
+  char *channel  = getchan(buffer);
+  char *message  = getmsg(buffer);
 
   /* check if all exist in message */
-  if((userNick[0] != '\0' && channel[0] != '\0' && message[0] != '\0'))
-    printf("[%s] %s: %s\n", userNick, channel, message);
+  if((nick[0] != '\0' && channel[0] != '\0' && message[0] != '\0'))
+    printf("[%s] %s: %s\n", nick, channel, message);
   exec(message, channel);
 
   /* release pointers */
-  free(userNick);
-  free(channel);
-  free(message);
+  free(nick); free(channel); free(message);
 
   return buffer; /* return buffer */
 }

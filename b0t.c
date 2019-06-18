@@ -3,7 +3,7 @@
   b0t Main,
   IRC Functions.
 
-  Author: aSynKronus
+  Author: stackiller
 
 */
 
@@ -62,7 +62,6 @@ int main(int count, char *args[])
   {
     irc.buffer = NULL; // point pointer to null
     irc.buffer = readBf(irc.buffer); // store the read message
-    // printf("%s", irc.buffer); // print message
     free(irc.buffer); // release buffer
   }
   while(1);
