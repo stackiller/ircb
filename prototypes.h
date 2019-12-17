@@ -16,9 +16,6 @@ typedef struct {
   char *buffer; // buffer for messages
 } irc_d;
 
-/* attribute irc data type to irc */
-irc_d irc;
-
 /* priv messages */ 
 void privMsg(char *msg, char *dst);
 
@@ -26,7 +23,7 @@ void privMsg(char *msg, char *dst);
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
 
 // Sizes
-#define MSG_LEN 3084
+#define MSG_LEN 1024
 
 // Error defines
 #define FAIL -1
