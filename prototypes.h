@@ -5,19 +5,27 @@
 
 */
 
+/* irc Logo */
+char irc_h[5][90] = {
+  "▪  ▄▄▄   ▄▄· ▄▄▄▄·       ▄▄▄▄▄\0",
+  "██ ▀▄ █·▐█ ▌▪▐█ ▀█▪▪     •██  \0",
+  "▐█·▐▀▀▄ ██ ▄▄▐█▀▀█▄ ▄█▀▄  ▐█.▪\0",
+  "▐█▌▐█•█▌▐███▌██▄▪▐█▐█▌.▐▌ ▐█▌·\0",
+  "▀▀▀.▀  ▀·▀▀▀ ·▀▀▀▀  ▀█▄▀▪ ▀▀▀ \0"
+};
+
 /* IRC struct data types */
 typedef struct {
-  int sockfd; // socket file descriptor
   SSL_CTX *ctx; // SSL context pointer
   SSL *ssl; // ssl Descriptor
+  int sockfd; // socket file descriptor
   char *host, *port; // host and port
   char *nick, *pass; // nick and pass
-  char *chans; // channels
-  char *buffer; // buffer for messages
+  char *chans, *buffer; // channels && buffer
 } irc_d;
 
 /* priv messages */ 
-void privMsg(char *msg, char *dst);
+void priv_msg(char *msg, char *dst);
 
 // get array size
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))

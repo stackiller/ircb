@@ -16,25 +16,25 @@ char wiki_help[] = "Hi need awesome help ?";
 
 // Brules - rules of channel
 void Brules(char dst[]) {
-	privMsg(wiki_rules, dst);
+	priv_msg(wiki_rules, dst);
 }
 // Bregister - register wiki
 void Bregister(char dst[]) {
-	privMsg(wiki_register, dst);
+	priv_msg(wiki_register, dst);
 }
 // Bidentify - identify wiki
 void Bidentify(char dst[]) {
-	privMsg(wiki_identify, dst);
+	priv_msg(wiki_identify, dst);
 }
 // Brules - rules of channel
 void Babout(char dst[]) {
-	privMsg(wiki_about, dst);
+	priv_msg(wiki_about, dst);
 }
 // Bsay - rules of channel
 void Bsay(char dst[]) {
-	privMsg(wiki_say, dst);
+	priv_msg(wiki_say, dst);
 }
 // Bsay - rules of channel
 void Bhelp(char dst[]) {
-	privMsg(wiki_help, dst);
+	priv_msg(wiki_help, dst);
 }
