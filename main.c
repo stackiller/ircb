@@ -42,7 +42,9 @@ main(int n_args, char *s_args[])
   irc.chans = s_args[5];
   irc.ctx = initCtx(); // init the SSL context.
   irc.ssl = SSL_new(irc.ctx); // create new SSL context.
-  irc.sockfd = newCon(irc.host, atoi(irc.port)); // initialize SSL connection.
+  irc.sockfd = new_con(irc.host, atoi(irc.port)); // initialize SSL connection.
+
+  irc_header(); // irc header
 
   // attach SSL context to socket.
   SSL_set_fd(irc.ssl, irc.sockfd);
@@ -55,15 +57,15 @@ main(int n_args, char *s_args[])
     fgGreen, blink, resetCl, SSL_get_cipher(irc.ssl)
   ); showCerts(irc.ssl);
 
-  setNick(irc.nick); // identify user
-  setCreds(irc.pass); // set credentials
+  set_nick(irc.nick); // identify user
+  set_creds(irc.pass); // set credentials
 
   // receive messages
   do
   {
     irc.buffer = NULL; // point pointer to null
-    irc.buffer = readBuf(irc.buffer); // store the read message
-    fprintf(stdout, "%s\n", irc.buffer);
+    irc.buffer = read_buf(irc.buffer); // store the read message
+    // fprintf(stdout, "%s", irc.buffer); // comment this if you dont want see the buffer
     free(irc.buffer); // release buffer
   } while(1);
 
