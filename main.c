@@ -59,13 +59,13 @@ main(int n_args, char *s_args[])
 
   set_nick(irc.nick); // identify user
   set_creds(irc.pass); // set credentials
+  set_join(irc.ssl); // join to channel
 
   // receive messages
-  do
-  {
+  do {
     irc.buffer = NULL; // point pointer to null
     irc.buffer = read_buf(irc.buffer); // store the read message
-    // fprintf(stdout, "%s", irc.buffer); // comment this if you dont want see the buffer
+    fprintf(stdout, "%s", irc.buffer); // comment this if you dont want see the buffer output
     free(irc.buffer); // release buffer
   } while(1);
 
