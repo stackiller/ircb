@@ -99,9 +99,9 @@ comp_str(char *key, char *msg)
     return(0);
 }
  
-/* exec - get command from message */
+/* bot_exec - get command from message */
 void
-exec(char *msg, char *chan)
+bot_exec(char *msg, char *chan)
 {
   typedef void (*funcs_c)(char[]);
   char m_copy[(strlen(msg))];
@@ -195,36 +195,21 @@ set_join()
   SSL_write(irc.ssl, set_join, join_len); // send join command
 }
 
-// sendPong - send Pong response
+/* set_pong - send Pong response */
 int
-set_pong(SSL *ssl, char *pingOnMsg)
+set_pong(SSL *ssl, char *msg)
 {
-  int index = 5; // index of pong array
-  int pong_len = 0; // pong lenght
-  char *pong; // pong response message
+  char *ping, *pong;
+  char m_copy[strlen(msg)];
 
-  // calculate size of ping message
-  while(pingOnMsg[index] != '\n' && pingOnMsg[index] != 32) {
-    pong_len++; // increment size of pong_len
-    index++; // increment index
-  }
+  strncpy(m_copy, msg, strlen(m_copy));
+  ping = strstr(m_copy, " :");
+  pong = (char*) calloc(strlen(ping) + 7, 1);
+  snprintf(pong, strlen(ping) + 7, "PONG%s\r\n", ping);
 
-  pong_len += 7; // num pong positions
-  pong = calloc(pong_len, sizeof(char)); // alocates pong
-  strcpy(pong, "PONG "); // copy PONG to pong array
-  
-  // copy ping to pong
-  index = 5;
-  while(pingOnMsg[index] != '\n') {
-    pong[index] = pingOnMsg[index]; // copy begin to pong
-    index++;
-  } // format array
-  pong[pong_len-2] = '\r';
-  pong[pong_len-1] = '\n';
-
-  printf("[%s%s*%s] %s", fgBlue, blink, resetCl, pong); // print pong message
-  SSL_write(irc.ssl, pong, pong_len); // send pong response
-  return(0);
+  printf("[%s%s*%s] %s", fgBlue, blink, resetCl, pong);
+  SSL_write(ssl, pong, strlen(pong));
+  return 0;
 }
 
 // send messages
@@ -263,30 +248,27 @@ char
     strncat(msg_recv, msg_line, msg_nbyts); // concatene lines
   } while(SSL_pending(irc.ssl));
 
-  char *pingOn = strstr(msg_recv, "PING "); // check ping
-  char *endOf = strstr(msg_recv, "End of"); // check end of messages
-
   // check for ping or end of motd
-  if( (msg_recv[0] != ':') && (pingOn != NULL) ) {
+  if( msg_recv[0] != ':' && strstr(msg_recv, "PING ") != NULL ) {
     set_pong(irc.ssl, msg_recv);
     return msg_recv;
   }
-  else if( (msg_recv[0] == ':') && (endOf != NULL) ) {
-    set_join(irc.ssl);
-    return msg_recv;
-  }
 
-  /* fetch data { nick, chan, msg } */
-  char *msg_nick = get_nick(msg_recv);
-  char *msg_chan = get_chan(msg_recv);
-  char *msg_text = get_msg(msg_recv);
+  /* parse message { nick, chan, msg } */
+  char **msg_data = (char**) calloc(3, sizeof(char*));
+  msg_data[0] = get_nick(msg_recv);
+  msg_data[1] = get_chan(msg_recv);
+  msg_data[2] = get_msg(msg_recv);
 
   /* check if all exist in message */
-  if((msg_nick != NULL && msg_chan != NULL && msg_text != NULL))
+  if((
+    msg_data[0] != NULL && msg_data[1] != NULL && msg_data[2] != NULL
+    ))
   {
-    printf("[%s] %s: %s\n", msg_nick, msg_chan, msg_text);
-    exec(msg_text, msg_chan); // check for bot commands
-    free(msg_nick);free(msg_chan);free(msg_text);
+    printf("[%s] %s: %s\n", msg_data[0], msg_data[1], msg_data[2]);
+    bot_exec(msg_data[2], msg_data[1]); // check for bot commands
+    for(int i=0; i < 3; i++)
+      free(msg_data[i]);
   }
   
   return msg_recv;
