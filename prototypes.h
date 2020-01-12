@@ -15,7 +15,7 @@ char irc_h[5][90] = {
 };
 
 /* Bot adm nick */
-#define BOT_ADM ""
+#define BOT_ADM "stackiller"
 
 /* IRC struct data types */
 typedef struct {
