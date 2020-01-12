@@ -17,7 +17,7 @@
 
 #include "prototypes.h"
 
-#include "modules/moderate.c"
+#include "modules/mod.c"
 #include "modules/tricks.c"
 
 #include "irc_funcs.c"
@@ -25,14 +25,16 @@
 
 /* main - create SSL context and connect */
 int
-main(int n_args, char *s_args[])
-{
+main(int n_args, char *s_args[]) {
+  
   // check arguments number.
   if(n_args != 6)
   {
     printf("usage: %s <server_addr> <port> <nick> <password> \"#channel1,#channel2,#channel3,#channel4,#channel5\"\n", s_args[0]);
     exit(0);
   }
+
+  b_header(); // bot header
 
   // assign data to fields.
   irc.host = s_args[1];
@@ -44,28 +46,15 @@ main(int n_args, char *s_args[])
   irc.ssl = SSL_new(irc.ctx); // create new SSL context.
   irc.sockfd = new_con(irc.host, atoi(irc.port)); // initialize SSL connection.
 
-  irc_header(); // irc header
-
-  // attach SSL context to socket.
-  SSL_set_fd(irc.ssl, irc.sockfd);
-  if(SSL_connect(irc.ssl) == FAIL) // create SSL connection with the host.
-    ERR_print_errors_fp(stderr);
-  else
-  // show SSL chiper - certificates
-  printf(
-    "[%s%s*%s] Connected with %s encryption\n",
-    fgGreen, blink, resetCl, SSL_get_cipher(irc.ssl)
-  ); showCerts(irc.ssl);
-
   set_nick(irc.nick); // identify user
-  set_creds(irc.pass); // set credentials
-  set_join(irc.ssl); // join to channel
+  set_creds(irc.nick, irc.pass); // set credentials
+  set_join(irc.chans); // join to channel
 
   // receive messages
   do {
-    irc.buffer = NULL; // point pointer to null
-    irc.buffer = read_buf(irc.buffer); // store the read message
-    fprintf(stdout, "%s", irc.buffer); // comment this if you dont want see the buffer output
+    // irc.buffer = NULL; // point pointer to null
+    irc.buffer = read_buff(); // store the read message
+    fprintf(stdout, "%s", irc.buffer); // uncomment this if you want see the buffer output
     free(irc.buffer); // release buffer
   } while(1);
 

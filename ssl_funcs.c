@@ -1,7 +1,6 @@
 /* initialize the SSL engine */
 SSL_CTX*
-initCtx(void)
-{
+initCtx(void) {
   // SSL metho and context
   const SSL_METHOD *method; // SSL method pointer
   SSL_CTX *ctx; // SSL context pointer
@@ -22,14 +21,13 @@ initCtx(void)
 
 /* show certificates function */
 void
-showCerts()
-{
+show_Certs(SSL *ssl) {
   // X509 certificate and line pointer
   X509 *cert; // X509 certificate pointer
   char *line; // line buffer
 
   // get the server's certificate
-  cert = SSL_get_peer_certificate(irc.ssl);
+  cert = SSL_get_peer_certificate(ssl);
   if(cert != NULL)
   {
     printf("Server certificates:\n"); // show message before.

@@ -14,6 +14,9 @@ char irc_h[5][90] = {
   "▀▀▀.▀  ▀·▀▀▀ ·▀▀▀▀  ▀█▄▀▪ ▀▀▀ \0"
 };
 
+/* Bot adm nick */
+#define BOT_ADM ""
+
 /* IRC struct data types */
 typedef struct {
   SSL_CTX *ctx; // SSL context pointer
@@ -24,14 +27,41 @@ typedef struct {
   char *chans, *buffer; // channels && buffer
 } irc_d;
 
-/* priv messages */ 
-void priv_msg(char *msg, char *dst);
+/* Prototypes of functions */
+
+int new_con(const char*, int); // create socket
+
+
+int str_cmp(char*, char*); // compare two strings.
+char* g_nArg(char*, int); // get arguments of message.
+char* str_Chr(char*, char); // split token, using ch.
+
+void Bexec(char*, char*, char*); // controller bot commands.
+
+char* g_Nick(char*); // get user nick of message.
+char* g_Chan(char*); // get channel of message.
+char* g_Msg(char*); // get message of buffer.
+char* g_Host(char*, char, char); // get host of message.
+
+void set_nick(char*);
+void set_creds(char*, char*);
+void set_join(char*);
+void priv_msg(char*, char*);
+
+int set_pong(SSL*, char*);
+char *read_buff(void);
+
+void show_msg(char**);
+
+void b_header(void);
+void show_Certs(SSL*);
+SSL_CTX* init_Ctx(void);
 
 // get array size
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
 
 // Sizes
-#define MSG_LEN 1024
+#define MSG_LEN 2024
 
 // Error defines
 #define FAIL -1
