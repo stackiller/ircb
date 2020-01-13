@@ -34,7 +34,7 @@ main(int n_args, char *s_args[]) {
     exit(0);
   }
 
-  b_header(); // bot header
+  b_Header(); // bot header
 
   // assign data to fields.
   irc.host = s_args[1];
@@ -42,18 +42,17 @@ main(int n_args, char *s_args[]) {
   irc.nick = s_args[3];
   irc.pass = s_args[4];
   irc.chans = s_args[5];
-  irc.ctx = initCtx(); // init the SSL context.
+  irc.ctx = init_Ctx(); // init the SSL context.
   irc.ssl = SSL_new(irc.ctx); // create new SSL context.
-  irc.sockfd = new_con(irc.host, atoi(irc.port)); // initialize SSL connection.
+  irc.sockfd = new_Conn(irc.host, atoi(irc.port)); // initialize SSL connection.
 
-  set_nick(irc.nick); // identify user
-  set_creds(irc.nick, irc.pass); // set credentials
-  set_join(irc.chans); // join to channel
+  b_Nick(irc.nick); // identify user
+  b_Creds(irc.nick, irc.pass); // set credentials
+  b_Join(irc.chans); // join to channel
 
   // receive messages
   do {
-    // irc.buffer = NULL; // point pointer to null
-    irc.buffer = read_buff(); // store the read message
+    irc.buffer = r_Buffer(); // store the read message
     fprintf(stdout, "%s", irc.buffer); // uncomment this if you want see the buffer output
     free(irc.buffer); // release buffer
   } while(1);

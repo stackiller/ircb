@@ -1,6 +1,7 @@
 /* initialize the SSL engine */
 SSL_CTX*
-initCtx(void) {
+init_Ctx(void)
+{
   // SSL metho and context
   const SSL_METHOD *method; // SSL method pointer
   SSL_CTX *ctx; // SSL context pointer
@@ -21,7 +22,8 @@ initCtx(void) {
 
 /* show certificates function */
 void
-show_Certs(SSL *ssl) {
+show_Certs(SSL *ssl)
+{
   // X509 certificate and line pointer
   X509 *cert; // X509 certificate pointer
   char *line; // line buffer
