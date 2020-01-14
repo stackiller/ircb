@@ -30,17 +30,22 @@ r_Buffer()
   char *_mRecv = (char*) calloc(M_LEN, 1);
   char *_mLines = (char*) calloc(M_LEN, 1);
 
-  // fetch data from SSL socket
-  do {
-    memset(_mLines, 0x0, M_LEN);
-    _mBytes = SSL_read(irc.ssl, _mLines, M_LEN);
-    
-    if(_mBytes <= 0)
-      break;
-    _mtBytes += _mBytes;
-    
-    strncat(_mRecv, _mLines, _mBytes);
-  } while(SSL_pending(irc.ssl));
+  // read data over ssl connection, if any
+  if(irc.isSSL) {
+    do {
+      memset(_mLines, 0x0, M_LEN);
+      _mBytes = SSL_read(irc.ssl, _mLines, M_LEN);
+      
+      if(_mBytes <= 0)
+        break;
+      _mtBytes += _mBytes;
+      
+      strncat(_mRecv, _mLines, _mBytes);
+    } while(SSL_pending(irc.ssl));
+  }
+  else {
+    recv(irc.sockfd, _mRecv, M_LEN, 0);
+  }
 
   // respose pong message
   if((b_Pong(irc.ssl, _mRecv)) == 0)
@@ -62,7 +67,7 @@ r_Buffer()
   
   b_Exec(_mData[0], _mData[2], _mData[3]); // execute bot commands
 
-  m_Destroy(_mData, 4);
+  m_Destroy(_mData, 4); // release
   return _mRecv;
 }
 
@@ -222,7 +227,7 @@ g_nArg(char *mCopy, int n_arg)
 int
 str_Cmp(char *d1, char *d2)
 {
-  if(strncmp(d2, d1, strlen(d1)) == 0)
+  if(strcmp(d2, d1) == 0)
     return(1);
   else
     return(0);
@@ -271,8 +276,8 @@ b_Nick(char *uNick)
   snprintf(_mData[0], B_LEN, "NICK %s\r\n", uNick);
   snprintf(_mData[1], B_LEN, "USER %s %s %s %s\r\n", uNick, uNick, uNick, uNick);
 
-  SSL_write(irc.ssl, _mData[0], strlen(_mData[0])); // send nick
-  SSL_write(irc.ssl, _mData[1], strlen(_mData[1])); // send ident
+  m_Send(_mData[0]); // send nick
+  m_Send(_mData[1]); // send ident
 
   m_Destroy(_mData, 2);
 }
@@ -285,7 +290,7 @@ b_Creds(char *uNick, char *uPass)
 
   // format buffers
   snprintf(_uCreds, B_LEN, "IDENTIFY %s %s\r\n", uNick, uPass);
-  SSL_write(irc.ssl, _uCreds, strlen(_uCreds)); // send nick
+  m_Send(_uCreds); // send nick
 
   free(_uCreds);
 }
@@ -297,7 +302,7 @@ b_Join(char *uChans)
   char *_uJoin = (char*) calloc(B_LEN, 1); // alocattes join
 
   snprintf(_uJoin, B_LEN, "JOIN %s\r\n", uChans); // format join buffer
-  SSL_write(irc.ssl, _uJoin, strlen(_uJoin)); // send join command
+  m_Send(_uJoin); // send join command
 
   free(_uJoin);
 }
@@ -321,7 +326,7 @@ b_Pong(SSL *ssl, char *msg)
   snprintf(_mData[1], B_LEN, "PONG%s", _uPing);
 
   printf("[%s%s*%s] %s", tBlue, tBlink, tRs, _mData[1]);
-  SSL_write(ssl, _mData[1], strlen(_mData[1]));
+  m_Send(_mData[1]);
   
   m_Destroy(_mData, 2);
   return 0;
@@ -334,7 +339,7 @@ b_Priv(char *mArg, char *mDest)
   char *_pMsg = (char*) calloc(B_LEN, 1); // allocates msg_tmp
   
   snprintf(_pMsg, B_LEN, "PRIVMSG %s :%s\r\n", mDest, mArg); // format msg_tmp buffer
-  SSL_write(irc.ssl, _pMsg, B_LEN); // send message
+  m_Send(_pMsg); // send message
 
   free(_pMsg);
 }
@@ -349,8 +354,8 @@ new_Conn(const char *hostname, int port)
 
   // get addresss from hostname
   if((host = gethostbyname(hostname)) == NULL) {
-    perror(hostname);
-    abort();
+    printf("[@] wrong host: %s\n", hostname);
+    exit(1);
   }
 
   // create socket TCP/IP
@@ -371,18 +376,24 @@ new_Conn(const char *hostname, int port)
     perror(FAIL_CONN);
   }
 
-  // attach SSL context to socket.
+  if(!irc.isSSL) {
+    return sockfd;
+  }
+
+  // attach SSL context to socket
   SSL_set_fd(irc.ssl, sockfd);
+
+  // connect with ssl
   if(SSL_connect(irc.ssl) == FAIL)
     ERR_print_errors_fp(stderr);
   else {
     printf(
       "[%s%s*%s] Connected with %s encryption\n",
-      tGreen, tBlink, tRs, SSL_get_cipher(irc.ssl)
-    );
-  } show_Certs(irc.ssl);
+      tGreen, tBlink, tRs, SSL_get_cipher(irc.ssl));
+  }
+  show_Certs(irc.ssl); // show certificates
 
-  return(sockfd);
+  return sockfd;
 }
 
 /* b_Header */
@@ -390,4 +401,19 @@ void
 b_Header() {
   for(int i=0; i < ARRAY_SIZE(b_Brand); i++)
     printf("%s %s %s\n", tGreen, b_Brand[i], tRs);
+}
+
+/* m_Send - send SSL Message */ 
+void
+m_Send(char *msg) {
+  irc.isSSL ?
+  SSL_write(irc.ssl, msg, strlen(msg)) :
+  send(irc.sockfd, msg, strlen(msg), 0);
+}
+
+/* usage - helper function of program */
+void
+usage(char *c_name) {
+  printf("usage: %s <server_addr> <port> <nick> <password> \'#channel1,#channel2,#channel3..\' {optional flag: --nossl}\"\n", c_name);
+  exit(0);
 }

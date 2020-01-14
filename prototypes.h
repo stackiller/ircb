@@ -25,6 +25,7 @@ typedef struct {
   SSL_CTX *ctx; // SSL context pointer
   SSL *ssl; // ssl Descriptor
   int sockfd; // socket file descriptor
+  bool isSSL;
   char *host, *port; // host and port
   char *nick, *pass; // nick and pass
   char *chans, *buffer; // channels && buffer
@@ -45,6 +46,7 @@ char* g_Msg(char*); // get message of buffer.
 char* g_Host(char*, char, char); // get host of message.
 char* g_nArg(char*, int); // get arguments of message.
 
+void m_Send(char*);
 void show_Certs(SSL*);
 void b_Nick(char*);
 void b_Creds(char*, char*);
@@ -53,6 +55,7 @@ void p_Msg(char*, char*);
 void b_Exec(char*, char*, char*); // controller bot commands.
 void s_Msg(char**);
 void b_Header(void);
+void usage(char*);
 
 // Sizes
 #define M_LEN 2024
