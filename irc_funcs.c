@@ -227,10 +227,14 @@ g_nArg(char *mCopy, int n_arg)
 int
 str_Cmp(char *d1, char *d2)
 {
-  if(strcmp(d2, d1) == 0)
+  if(strcmp(d2, d1) == 0) {
+    printf("%s - %s: iguais.\n", d1, d2);
     return(1);
-  else
+  }
+  else {
+    printf("%s - %s: diferentes.\n", d1, d2);
     return(0);
+  }
 }
  
 /* b_Exec */
@@ -239,12 +243,14 @@ b_Exec(char *uHost, char *uChan, char *uMsg)
 {
   typedef void (*mod_f)(char[], char[]);
   char *_mCopy = (char*) calloc(strlen(uMsg), 1);
+  char *_cKey; // command key in message
 
   strncpy(_mCopy, uMsg, strlen(uMsg));
+  _cKey = g_nArg(_mCopy, 0);
 
   // moderator functions key.
   char *_modKeys[] = {
-    "bjoin", "bnick", "bkick"
+    "bjoin\0", "bnick\0", "bkick\0"
   };
  
   // moderator functions.
@@ -255,7 +261,7 @@ b_Exec(char *uHost, char *uChan, char *uMsg)
   // compare userhost for execute commands.
   if(str_Cmp(uHost, BOT_ADM)) {
     for(int i=0; i<ARRAY_SIZE(_modKeys); i++) {
-      if(str_Cmp(_modKeys[i], _mCopy)) {
+      if(str_Cmp(_modKeys[i], _cKey)) {
         mod_funcs[i](uChan, _mCopy);
       }
     }
@@ -311,7 +317,7 @@ b_Join(char *uChans)
 int
 b_Pong(SSL *ssl, char *msg)
 {
-  if((msg[0] == ':') && (strstr(msg, "PING ") == NULL))
+  if((msg[0] == ':') && (strstr(msg, "PING :") == NULL))
     return 1;
 
   char *_uPing;
@@ -325,7 +331,7 @@ b_Pong(SSL *ssl, char *msg)
   _uPing = strstr(_mData[0], " :");
   snprintf(_mData[1], B_LEN, "PONG%s", _uPing);
 
-  printf("[%s%s*%s] %s", tBlue, tBlink, tRs, _mData[1]);
+  printf("\n[%s%s*%s] %s\n", tBlue, tBlink, tRs, _mData[1]);
   m_Send(_mData[1]);
   
   m_Destroy(_mData, 2);
@@ -414,6 +420,8 @@ m_Send(char *msg) {
 /* usage - helper function of program */
 void
 usage(char *c_name) {
-  printf("usage: %s <server_addr> <port> <nick> <password> \'#channel1,#channel2,#channel3..\' {optional flag: --nossl}\"\n", c_name);
+  b_Header();
+  printf(
+    "Use:\n%s <server_addr> <port> <nick> \'<password>\' \'#channel1,#channel2,#channel3..\' <optional flag: --nossl>\n", c_name);
   exit(0);
 }

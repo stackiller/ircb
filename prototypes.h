@@ -59,7 +59,7 @@ void usage(char*);
 
 // Sizes
 #define M_LEN 2024
-#define B_LEN 512
+#define B_LEN 30
 
 // Error defines
 #define FAIL -1

@@ -29,10 +29,10 @@ int
 main(int n_args, char *s_args[]) {
   
   // check arguments number
-  if(n_args < 6)
+  if(n_args < 6) {
     usage(s_args[0]);
-
-  b_Header(); // bot header
+    exit(0);
+  }
 
   // assign data to fields
   irc.host = s_args[1];
@@ -52,6 +52,9 @@ main(int n_args, char *s_args[]) {
   irc.ctx = irc.isSSL ? init_Ctx() : NULL;
   irc.ssl = irc.isSSL ? SSL_new(irc.ctx) : NULL;
   irc.sockfd = new_Conn(irc.host, atoi(irc.port));
+
+  // Bot header
+  b_Header();
 
   b_Nick(irc.nick); // identify user
   b_Creds(irc.nick, irc.pass); // set credentials
