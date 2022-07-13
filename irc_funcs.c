@@ -11,14 +11,39 @@ irc_d irc;
 /* m_Destroy */
 void
 m_Destroy(char **m, int mSize) {
-  for(int i=0; i < mSize; i++)
+  for(int i=0; i < mSize; i++) {
     free(m[i]);
+  }
 }
 
 /* s_Msg */
 void
 s_Msg(char **msg_data) {
-  printf("[%s] %s: %s\n", msg_data[1], msg_data[2], msg_data[3]);
+  printf("[%s] %s: %s\n", msg_data[0], msg_data[1], msg_data[2]);
+}
+
+/* Split */
+char*
+split(char *str, char ch1, char ch2)
+{
+  int i, j = 0;
+  char *splited = (char*) calloc(1024,1);
+
+  for(i=1; i < strlen(str); i++)
+  {
+    if(str[i-1] == ch1)
+    {
+      while(str[i] != ch2)
+      {
+        splited[j] = str[i];
+        i++; j++;
+      }
+      return splited;
+    }
+  }
+
+  free(splited);
+  return NULL;
 }
 
 /* r_Buffer */
@@ -28,7 +53,7 @@ r_Buffer()
   int _mBytes, _mtBytes = 0;
 
   char *_mRecv = (char*) calloc(M_LEN, 1);
-  char *_mLines = (char*) calloc(M_LEN, 1);
+  char _mLines[M_LEN] = {};
 
   // read data over ssl connection, if any
   if(irc.isSSL) {
@@ -40,7 +65,7 @@ r_Buffer()
         break;
       _mtBytes += _mBytes;
       
-      strncat(_mRecv, _mLines, _mBytes);
+      strcat(_mRecv, _mLines);
     } while(SSL_pending(irc.ssl));
   }
   else {
@@ -48,26 +73,28 @@ r_Buffer()
   }
 
   // respose pong message
-  if((b_Pong(irc.ssl, _mRecv)) == 0)
+  if((b_Pong(irc.ssl, _mRecv)) == 0) {
     return _mRecv;
+  }
 
-  // parse data from message
-  char *_mData[4] = {
-    g_Host(_mRecv, '!', '@'), g_Nick(_mRecv),
-    g_Chan(_mRecv), g_Msg(_mRecv)
+  char *_mData[3] = {
+    (char*)(g_Host(_mRecv, '!', '@')),
+    g_Chan(_mRecv),
+    g_Msg(_mRecv)
   };
 
-  for(int i=0; i < 4; i++) {
-    if(_mData[i] != NULL) continue;
-    else {
-      m_Destroy(_mData, 4);
-      return _mRecv;
-    }
-  } 
-  
-  b_Exec(_mData[0], _mData[2], _mData[3]); // execute bot commands
+  if(_mData[0] == NULL) {
+    m_Destroy(_mData, 3);
+    return _mRecv;
+  }
 
-  m_Destroy(_mData, 4); // release
+  // s_Msg(_mData);
+  
+  if(_mData[0] != NULL &&_mData[1] != NULL && _mData[2] != NULL) {
+    b_Exec(_mData[0], _mData[1], _mData[2]); // execute bot commands
+  }
+
+  m_Destroy(_mData, 3); // release
   return _mRecv;
 }
 
@@ -92,28 +119,52 @@ str_Chr(char *str, char ch)
   return str_spl;
 }
 
-/* g_Nick */
+/* g_mCode - get message Code */ 
 char*
-g_Nick(char *msg)
-{
-  char *_mToken;  
-  char *_mData[] = {
-    (char*) calloc(strlen(msg), 1), // msg
-    (char*) calloc(512, 1) // nick
-  };
+g_mCode(char *msg) {
+  char *start = strchr(msg, 32);
+  char *code;
 
-  strncpy(_mData[0], msg, strlen(msg));
-
-  _mToken = str_Chr(_mData[0], '!');
-  if(_mToken == NULL) {
-     free(_mToken); m_Destroy(_mData, 2);
+  if(start == NULL) {
     return NULL;
   }
 
-  for(int i=0; i<strlen(_mToken); i++)
-    _mData[1][i] = _mToken[i+1];
+  code = (char*) calloc(3, 1);
+
+  int i = 0;
+  do {
+    code[i] = start[i+1];
+    i++;
+  } while(start[i+1] != 32 && i <= 3);
+
+  printf("CODE: %s\n", code);
+
+  return code;
+}
+
+/* g_Nick */
+char*
+g_Nick(char *msg) {
+  int i = 0;
+
+  char *_mData[] = {
+    (char*) calloc(strlen(msg), 1), // copy message
+    (char*) calloc(9, 1) // nick
+  };
   
-  free(_mToken); free(_mData[0]);
+  strncpy(_mData[0], msg, strlen(msg)); // copy message
+
+  do {
+    _mData[1][i] = _mData[0][i];
+    i++;
+  } while(_mData[0][i] != '!' || i < 8);
+
+  if(_mData[1] == NULL) {
+    m_Destroy(_mData, 2);
+    return NULL;
+  }
+
+  free(_mData[0]);
   return _mData[1];
 }
 
@@ -138,7 +189,7 @@ g_Chan(char *msg)
   }
 
   while(
-    (_mSpl[i] != '\r') && (_mSpl[i] != 32) ) {
+    (_mSpl[i] != '\r') && (_mSpl[i] != 32) && i < 512) {
     _mData[1][i-1] = _mSpl[i]; i++;
   }
 
@@ -166,7 +217,7 @@ g_Msg(char *msg)
     return NULL;
   }
 
-  while(_mSpl[i] != '\r') {
+  while(_mSpl[i] != '\r' && i < strlen(msg)) {
     _mData[1][i-2] = _mSpl[i]; i++;
   }
   
@@ -178,24 +229,23 @@ g_Msg(char *msg)
 char*
 g_Host(char *mCopy, char ch1, char ch2)
 {
-  int i, j = 0;
+  int i = 0;
   char *u_Host = (char*) calloc(512,1);
+  char *split;
 
-  for(i=1; i < strlen(mCopy); i++)
-  {
-    if(mCopy[i-1] == ch1)
-    {
-      while(mCopy[i] != ch2)
-      {
-        u_Host[j] = mCopy[i];
-        i++; j++;
-      }
-      return u_Host;
-    }
+  split = strchr(mCopy, ch1);
+
+  if(split == NULL) {
+    free(u_Host);
+    return NULL;
   }
 
-  free(u_Host);
-  return NULL;
+  do {
+    u_Host[i] = split[i+2];
+    i++;
+  } while(split[i+2] != ch2 && i < 9);
+
+  return u_Host;
 }
 
 /* get_nArg */ 
@@ -238,15 +288,24 @@ str_Cmp(char *d1, char *d2)
 }
  
 /* b_Exec */
-void
+int
 b_Exec(char *uHost, char *uChan, char *uMsg)
 {
+
+  if(uHost == NULL || uChan == NULL || uMsg == NULL) {
+    return 1;
+  }
+
   typedef void (*mod_f)(char[], char[]);
   char *_mCopy = (char*) calloc(strlen(uMsg), 1);
   char *_cKey; // command key in message
 
   strncpy(_mCopy, uMsg, strlen(uMsg));
   _cKey = g_nArg(_mCopy, 0);
+
+  printf("uHost: %s, uChan: %s, uMsg: %s\n", uHost, uChan, uMsg);
+  printf("BOT ADM: %s\n", BOT_ADM);
+  printf("MSG: %s\n", uMsg);
 
   // moderator functions key.
   char *_modKeys[] = {
@@ -259,7 +318,7 @@ b_Exec(char *uHost, char *uChan, char *uMsg)
   };
 
   // compare userhost for execute commands.
-  if(str_Cmp(uHost, BOT_ADM)) {
+  if(!strcmp(uHost, BOT_ADM)) {
     for(int i=0; i<ARRAY_SIZE(_modKeys); i++) {
       if(str_Cmp(_modKeys[i], _cKey)) {
         mod_funcs[i](uChan, _mCopy);
@@ -267,6 +326,7 @@ b_Exec(char *uHost, char *uChan, char *uMsg)
     }
   }
   free(_mCopy);
+  return 0;
 }
 
 /* b_Nick */
@@ -308,10 +368,12 @@ b_Join(char *uChans)
   char *_uJoin = (char*) calloc(B_LEN, 1); // alocattes join
 
   snprintf(_uJoin, B_LEN, "JOIN %s\r\n", uChans); // format join buffer
-  m_Send(_uJoin); // send join command
 
+  m_Send(_uJoin); // send join command
+  
   free(_uJoin);
 }
+
 
 /* b_Pong */
 int
