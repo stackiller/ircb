@@ -41,6 +41,7 @@ main(int n_args, char *s_args[]) {
   irc.pass = s_args[4];
   irc.chans = s_args[5];
   irc.isSSL = true; // default to use SSL
+  // irc.buffer = (char*) calloc(M_LEN, 1);
 
   if(n_args == 7) {
     if(str_Cmp("--nossl", s_args[6]))
@@ -58,13 +59,21 @@ main(int n_args, char *s_args[]) {
 
   b_Nick(irc.nick); // identify user
   b_Creds(irc.nick, irc.pass); // set credentials
-  b_Join(irc.chans); // join to channel
 
   // receive messages
   do {
     irc.buffer = r_Buffer(); // read buffer
-    fprintf(stdout, "%s", irc.buffer); // uncomment this if you want see the buffer output
-    free(irc.buffer); // release buffer
+  
+    if(!strcmp(g_mCode(irc.buffer), "NOTI")) {
+      b_Join(irc.chans);
+    }
+
+    // fprintf(stdout, "%s", irc.buffer); // uncomment this if you want see the buffer output
+    
+    if(irc.buffer != NULL) {
+      free(irc.buffer);
+    }
+  
   } while(1);
 
   // release connection state
