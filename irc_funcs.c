@@ -8,7 +8,7 @@
 /* initialize new irc data structure */
 irc_d irc;
 
-/* m_Destroy */
+/* m_Destroy - destroy multidimensional array */
 void
 m_Destroy(char **m, int mSize) {
   for(int i=0; i < mSize; i++) {
@@ -16,13 +16,7 @@ m_Destroy(char **m, int mSize) {
   }
 }
 
-/* s_Msg */
-void
-s_Msg(char **msg_data) {
-  printf("[%s] %s: %s\n", msg_data[0], msg_data[1], msg_data[2]);
-}
-
-/* Split */
+/* Split - split message from ch1 to ch2 */
 char*
 split(char *str, char ch1, char ch2)
 {
@@ -46,7 +40,7 @@ split(char *str, char ch1, char ch2)
   return NULL;
 }
 
-/* r_Buffer */
+/* r_Buffer - read buffer messages */
 char*
 r_Buffer()
 {
@@ -54,6 +48,8 @@ r_Buffer()
 
   char *_mRecv = (char*) calloc(M_LEN, 1);
   char _mLines[M_LEN] = {};
+
+  memset(_mLines, 0x0, M_LEN);
 
   // read data over ssl connection, if any
   if(irc.isSSL) {
@@ -69,11 +65,14 @@ r_Buffer()
     } while(SSL_pending(irc.ssl));
   }
   else {
-    recv(irc.sockfd, _mRecv, M_LEN, 0);
+    while((recv(irc.sockfd, _mLines, M_LEN, 0)) > 0) {
+      strcat(_mRecv, _mLines);
+      memset(_mLines, 0x0, M_LEN);
+    }
   }
 
   // respose pong message
-  if((b_Pong(irc.ssl, _mRecv)) == 0) {
+  if((b_Pong(_mRecv)) == 0) {
     return _mRecv;
   }
 
@@ -88,11 +87,7 @@ r_Buffer()
     return _mRecv;
   }
 
-  // s_Msg(_mData);
-  
-  if(_mData[0] != NULL &&_mData[1] != NULL && _mData[2] != NULL) {
-    b_Exec(_mData[0], _mData[1], _mData[2]); // execute bot commands
-  }
+  b_Exec(_mData[0], _mData[1], _mData[2]); // execute bot commands
 
   m_Destroy(_mData, 3); // release
   return _mRecv;
@@ -137,12 +132,10 @@ g_mCode(char *msg) {
     i++;
   } while(start[i+1] != 32 && i <= 3);
 
-  printf("CODE: %s\n", code);
-
   return code;
 }
 
-/* g_Nick */
+/* g_Nick - get nick */
 char*
 g_Nick(char *msg) {
   int i = 0;
@@ -168,7 +161,7 @@ g_Nick(char *msg) {
   return _mData[1];
 }
 
-/* g_Chan */
+/* g_Chan - get channel */
 char*
 g_Chan(char *msg)
 {
@@ -197,7 +190,7 @@ g_Chan(char *msg)
   return _mData[1];
 }
 
-/* g_Msg */
+/* g_Msg - get message */
 char*
 g_Msg(char *msg)
 {
@@ -225,7 +218,7 @@ g_Msg(char *msg)
   return _mData[1];
 }
 
-/* g_Host */
+/* g_Host - get host */
 char*
 g_Host(char *mCopy, char ch1, char ch2)
 {
@@ -248,7 +241,7 @@ g_Host(char *mCopy, char ch1, char ch2)
   return u_Host;
 }
 
-/* get_nArg */ 
+/* get_nArg - get n arg */ 
 char*
 g_nArg(char *mCopy, int n_arg)
 {
@@ -273,39 +266,30 @@ g_nArg(char *mCopy, int n_arg)
   return NULL;
 }
 
-/* str_Cmp */
+/* str_Cmp - compare strings */
 int
 str_Cmp(char *d1, char *d2)
 {
   if(strcmp(d2, d1) == 0) {
-    printf("%s - %s: iguais.\n", d1, d2);
+    // printf("%s - %s: iguais.\n", d1, d2);
     return(1);
   }
   else {
-    printf("%s - %s: diferentes.\n", d1, d2);
+    // printf("%s - %s: diferentes.\n", d1, d2);
     return(0);
   }
 }
  
-/* b_Exec */
+/* b_Exec - execute bot commands */
 int
 b_Exec(char *uHost, char *uChan, char *uMsg)
 {
-
-  if(uHost == NULL || uChan == NULL || uMsg == NULL) {
-    return 1;
-  }
-
   typedef void (*mod_f)(char[], char[]);
   char *_mCopy = (char*) calloc(strlen(uMsg), 1);
   char *_cKey; // command key in message
 
   strncpy(_mCopy, uMsg, strlen(uMsg));
   _cKey = g_nArg(_mCopy, 0);
-
-  printf("uHost: %s, uChan: %s, uMsg: %s\n", uHost, uChan, uMsg);
-  printf("BOT ADM: %s\n", BOT_ADM);
-  printf("MSG: %s\n", uMsg);
 
   // moderator functions key.
   char *_modKeys[] = {
@@ -325,11 +309,12 @@ b_Exec(char *uHost, char *uChan, char *uMsg)
       }
     }
   }
+
   free(_mCopy);
   return 0;
 }
 
-/* b_Nick */
+/* b_Nick - set nick */
 void
 b_Nick(char *uNick)
 {
@@ -348,7 +333,7 @@ b_Nick(char *uNick)
   m_Destroy(_mData, 2);
 }
 
-/* b_Creds */
+/* b_Creds - set credentials */
 void
 b_Creds(char *uNick, char *uPass)
 {  
@@ -361,7 +346,8 @@ b_Creds(char *uNick, char *uPass)
   free(_uCreds);
 }
 
-/* b_Join */
+
+/* b_Join - join to channel */
 void
 b_Join(char *uChans)
 {
@@ -375,9 +361,9 @@ b_Join(char *uChans)
 }
 
 
-/* b_Pong */
+/* b_Pong - pong */
 int
-b_Pong(SSL *ssl, char *msg)
+b_Pong(char *msg)
 {
   if((msg[0] == ':') && (strstr(msg, "PING :") == NULL))
     return 1;
@@ -400,10 +386,9 @@ b_Pong(SSL *ssl, char *msg)
   return 0;
 }
 
-/* b_Priv */
+/* b_Priv - send privmsg */
 void
-b_Priv(char *mArg, char *mDest)
-{
+b_Priv(char *mArg, char *mDest) {
   char *_pMsg = (char*) calloc(B_LEN, 1); // allocates msg_tmp
   
   snprintf(_pMsg, B_LEN, "PRIVMSG %s :%s\r\n", mDest, mArg); // format msg_tmp buffer
@@ -412,10 +397,9 @@ b_Priv(char *mArg, char *mDest)
   free(_pMsg);
 }
 
-/* new_Conn */
+/* new_Conn - create new socket connection */
 int
-new_Conn(const char *hostname, int port)
-{
+new_Conn(const char *hostname, int port) {
   static struct sockaddr_in server; // struct sockaddr_in
   struct hostent *host; // struct hostent
   int sockfd; // socket file descriptor
@@ -432,6 +416,7 @@ new_Conn(const char *hostname, int port)
     close(sockfd);
     perror(FAIL_SOCK);
   }
+ 
   // assign data to fields
   server.sin_family = AF_INET; 
   server.sin_port = htons(port);
@@ -452,8 +437,9 @@ new_Conn(const char *hostname, int port)
   SSL_set_fd(irc.ssl, sockfd);
 
   // connect with ssl
-  if(SSL_connect(irc.ssl) == FAIL)
+  if(SSL_connect(irc.ssl) == FAIL) {
     ERR_print_errors_fp(stderr);
+  }
   else {
     printf(
       "[%s%s*%s] Connected with %s encryption\n",
@@ -464,11 +450,10 @@ new_Conn(const char *hostname, int port)
   return sockfd;
 }
 
-/* b_Header */
+/* b_Header - header to bot */
 void
 b_Header() {
-  for(int i=0; i < ARRAY_SIZE(b_Brand); i++)
-    printf("%s %s %s\n", tGreen, b_Brand[i], tRs);
+  printf("%s %s %s\n", tRed, b_Brand, tRs);
 }
 
 /* m_Send - send SSL Message */ 
