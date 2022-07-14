@@ -5,7 +5,7 @@
   &Bnick, &Bjoin, &Bnick,
 */
 
-/* Bnick - set nick */
+/* m_Nick - set nick */
 void
 m_Nick(char *dst, char *msg) {
   char *_bNick = g_nArg(msg, 1);
@@ -16,7 +16,7 @@ m_Nick(char *dst, char *msg) {
   }
 }
 
-/* Bjoin - join into channel */
+/* m_Join - join into channel */
 void
 m_Join(char *dst, char *msg) {
   char *_bJoin = g_nArg(msg, 1);
@@ -27,6 +27,22 @@ m_Join(char *dst, char *msg) {
   }
 }
 
-/* Bkick - change nick */
+/* m_Kick - kick nickname */
 void
-m_Kick(char *dst, char *msg) {}
+m_Kick(char *dst, char *msg) {
+  char *_datas[] = {
+    g_nArg(msg, 1),
+    g_nArg(msg, 2)
+  };
+
+  char *s_msg = (char*) calloc(B_LEN, 1);
+
+  snprintf(s_msg, B_LEN, "KICK %s %s\r\n", _datas[0], _datas[1]); // format join buffer
+
+  printf("KICK %s %s\n", _datas[0], _datas[1]);
+
+  m_Send(s_msg); // send join command
+
+  free(s_msg);
+  m_Destroy(_datas, 2);
+}
