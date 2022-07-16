@@ -340,8 +340,9 @@ b_Creds(char *uNick, char *uPass)
   char *_uCreds = (char*) calloc(B_LEN, 1); // allocates user creds
 
   // format buffers
-  snprintf(_uCreds, B_LEN, "IDENTIFY %s %s\r\n", uNick, uPass);
-  m_Send(_uCreds); // send nick
+  snprintf(_uCreds, B_LEN, "IDENTIFY %s %s", uNick, uPass);
+
+  b_Priv(_uCreds, "NickServ");
 
   free(_uCreds);
 }
@@ -389,9 +390,10 @@ b_Pong(char *msg)
 /* b_Priv - send privmsg */
 void
 b_Priv(char *mArg, char *mDest) {
-  char *_pMsg = (char*) calloc(B_LEN, 1); // allocates msg_tmp
+  char *_pMsg = (char*) calloc(B_LEN*2, 1); // allocates msg_tmp
   
-  snprintf(_pMsg, B_LEN, "PRIVMSG %s :%s\r\n", mDest, mArg); // format msg_tmp buffer
+  snprintf(_pMsg, B_LEN*2, "PRIVMSG %s :%s\r\n", mDest, mArg); // format msg_tmp buffer
+  
   m_Send(_pMsg); // send message
 
   free(_pMsg);
