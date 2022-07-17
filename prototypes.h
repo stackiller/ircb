@@ -78,6 +78,7 @@ void usage(char*);
 
 // Sizes
 #define M_LEN 80000
+#define M_LLEN 4024
 #define B_LEN 40
 
 // Error defines

@@ -59,12 +59,15 @@ main(int n_args, char *s_args[]) {
   irc.ssl = irc.isSSL ? SSL_new(irc.ctx) : NULL;
   irc.sockfd = new_Conn(irc.host, atoi(irc.port));
 
+  b_Nick(irc.nick); // identify user
+
   // receive messages
   do {
     irc.buffer = r_Buffer(); // read buffer
 
-    if(!strcmp(g_mCode(irc.buffer), "NOTI")) {
-      b_Nick(irc.nick); // identify user
+    char *endOf = strstr(irc.buffer, ":End of message of the day.");
+
+    if(endOf != NULL) {
       b_Creds(irc.nick, irc.pass); // set credentials
       b_Join(irc.chans); // join to channels
     }
@@ -74,6 +77,8 @@ main(int n_args, char *s_args[]) {
     if(irc.buffer != NULL) {
       free(irc.buffer);
     }
+
+    if(endOf != NULL) {}
   
   } while(1);
 

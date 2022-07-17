@@ -47,15 +47,15 @@ r_Buffer()
   int _mBytes, _mtBytes = 0;
 
   char *_mRecv = (char*) calloc(M_LEN, 1);
-  char _mLines[M_LEN] = {};
+  char _mLines[M_LLEN] = {};
 
-  memset(_mLines, 0x0, M_LEN);
+  memset(_mLines, 0x0, M_LLEN);
 
   // read data over ssl connection, if any
   if(irc.isSSL) {
     do {
-      memset(_mLines, 0x0, M_LEN);
-      _mBytes = SSL_read(irc.ssl, _mLines, M_LEN);
+      memset(_mLines, 0x0, M_LLEN);
+      _mBytes = SSL_read(irc.ssl, _mLines, M_LLEN);
       
       if(_mBytes <= 0)
         break;
@@ -67,7 +67,7 @@ r_Buffer()
   else {
     while((recv(irc.sockfd, _mLines, M_LEN, 0)) > 0) {
       strcat(_mRecv, _mLines);
-      memset(_mLines, 0x0, M_LEN);
+      memset(_mLines, 0x0, M_LLEN);
     }
   }
 
