@@ -10,10 +10,23 @@ irc_d irc;
 
 /* m_Destroy - destroy multidimensional array */
 void
-m_Destroy(char **m, int mSize) {
+m_Destroy(char **m, int mSize)
+{
   for(int i=0; i < mSize; i++) {
     free(m[i]);
   }
+}
+
+/* m_haveNull - check if exist any null element */
+int 
+m_haveNull(char **m, int mSize)
+{
+  for(int i=0; i < mSize; i++) {
+    if(m[i] == NULL) {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 /* Split - split message from ch1 to ch2 */
@@ -396,6 +409,17 @@ b_Priv(char *mArg, char *mDest) {
   
   m_Send(_pMsg); // send message
 
+  free(_pMsg);
+}
+
+/* b_Part - part of channel */
+void
+b_Part(char *chans) {
+  char *_pMsg = (char*) calloc(B_LEN, 1);
+
+  snprintf(_pMsg, B_LEN, "PART %s", chans);
+
+  m_Send(_pMsg);
   free(_pMsg);
 }
 
