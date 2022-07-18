@@ -57,6 +57,7 @@ SSL_CTX* init_Ctx(void);
 int new_Conn(const char*, int); // create socket
 int b_Pong(char*);
 int str_Cmp(char*, char*); // compare two strings.
+int m_haveNull(char**, int);
 
 char* r_Buffer(void);
 char* str_Chr(char*, char); // split token, using ch.
@@ -65,6 +66,8 @@ char* g_Chan(char*); // get channel of message.
 char* g_Msg(char*); // get message of buffer.
 char* g_Host(char*, char, char); // get host of message.
 char* g_nArg(char*, int); // get arguments of message.
+
+void m_Destroy(char **, int);
 
 void m_Send(char*);
 void show_Certs(SSL*);
