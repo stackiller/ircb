@@ -259,7 +259,7 @@ char*
 g_nArg(char *mCopy, int n_arg)
 {
   int i = 0, j = 0, k = 0;
-  char *n_String = (char*) calloc(512, 1);
+  char *n_String = (char*) calloc(1024, 1);
 
   for(i=0; i<strlen(mCopy); i++)
   {
@@ -306,12 +306,12 @@ b_Exec(char *uHost, char *uChan, char *uMsg)
 
   // moderator functions key.
   char *_modKeys[] = {
-    "bjoin\0", "bnick\0", "bkick\0"
+    "bjoin\0", "bnick\0", "bkick\0", "bpart\0"
   };
  
   // moderator functions.
   mod_f mod_funcs[ARRAY_SIZE(_modKeys)] = {
-    &m_Join, &m_Nick, &m_Kick
+    &m_Join, &m_Nick, &m_Kick, &m_Part,
   };
 
   // compare userhost for execute commands.
@@ -365,9 +365,11 @@ b_Creds(char *uNick, char *uPass)
 void
 b_Join(char *uChans)
 {
-  char *_uJoin = (char*) calloc(B_LEN, 1); // alocattes join
+  char *_uJoin = (char*) calloc(B_LEN*10, 1); // alocattes join
 
   snprintf(_uJoin, B_LEN, "JOIN %s\r\n", uChans); // format join buffer
+
+  printf("b_Join: %s\n", _uJoin);
 
   m_Send(_uJoin); // send join command
   
@@ -417,7 +419,9 @@ void
 b_Part(char *chans) {
   char *_pMsg = (char*) calloc(B_LEN, 1);
 
-  snprintf(_pMsg, B_LEN, "PART %s", chans);
+  snprintf(_pMsg, B_LEN, "PART %s :%s\r\n", chans, "afk");
+
+  printf("b_Part: %s\n", _pMsg);
 
   m_Send(_pMsg);
   free(_pMsg);

@@ -72,6 +72,7 @@ void b_Nick(char*);
 void b_Creds(char*, char*);
 void b_Join(char*);
 void b_Priv(char*, char*);
+void b_Part(char*);
 void p_Msg(char*, char*);
 int b_Exec(char*, char*, char*); // controller bot commands.
 void b_Header(void);
@@ -80,7 +81,7 @@ void usage(char*);
 // Sizes
 #define M_LEN 80000
 #define M_LLEN 4024
-#define B_LEN 40
+#define B_LEN 50
 
 // Error defines
 #define FAIL -1

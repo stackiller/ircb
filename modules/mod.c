@@ -49,3 +49,14 @@ m_Kick(char *dst, char *msg) {
   free(s_msg);
   m_Destroy(_datas, 2);
 }
+
+/* m_Part - part of channel */
+void
+m_Part(char *chans, char *msg) {
+  char *_bPart = g_nArg(msg, 1);
+  if(_bPart != NULL) {
+    b_Part(_bPart);
+    printf("[%s%s@%s] PART: %s\n", tBlink, tCyan, tRs, _bPart);
+    free(_bPart);
+  }
+}
