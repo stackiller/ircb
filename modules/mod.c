@@ -35,6 +35,9 @@ m_Kick(char *dst, char *msg) {
     g_nArg(msg, 2)
   };
 
+  if(m_haveNull(_datas, 2))
+    return;
+
   char *s_msg = (char*) calloc(B_LEN, 1);
 
   snprintf(s_msg, B_LEN, "KICK %s %s\r\n", _datas[0], _datas[1]); // format join buffer
