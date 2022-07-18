@@ -71,6 +71,7 @@ void show_Certs(SSL*);
 void b_Nick(char*);
 void b_Creds(char*, char*);
 void b_Join(char*);
+void b_Priv(char*, char*);
 void p_Msg(char*, char*);
 int b_Exec(char*, char*, char*); // controller bot commands.
 void b_Header(void);
