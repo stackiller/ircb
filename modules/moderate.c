@@ -8,7 +8,7 @@
 /* m_Nick - set nick */
 void
 m_Nick(char *dst, char *msg) {
-  char *_bNick = g_nArg(msg, 1);
+  char *_bNick = get_nArg(msg, 1);
   if(_bNick != NULL) {
     b_Nick(_bNick);
     printf("[%s%s@%s] NICK: %s\n", tBlink, tYellow, tRs, _bNick);
@@ -19,7 +19,7 @@ m_Nick(char *dst, char *msg) {
 /* m_Join - join into channel */
 void
 m_Join(char *dst, char *msg) {
-  char *_bJoin = g_nArg(msg, 1);
+  char *_bJoin = get_nArg(msg, 1);
   if(_bJoin != NULL) {
     b_Join(_bJoin);
     printf("[%s%s@%s] JOIN: %s\n", tBlink, tCyan, tRs, _bJoin);
@@ -31,11 +31,11 @@ m_Join(char *dst, char *msg) {
 void
 m_Kick(char *dst, char *msg) {
   char *_datas[] = {
-    g_nArg(msg, 1),
-    g_nArg(msg, 2)
+    get_nArg(msg, 1),
+    get_nArg(msg, 2)
   };
 
-  if(m_haveNull(_datas, 2))
+  if(matrix_haveNull(_datas, 2))
     return;
 
   char *s_msg = (char*) calloc(B_LEN, 1);
@@ -47,15 +47,15 @@ m_Kick(char *dst, char *msg) {
   m_Send(s_msg); // send join command
 
   free(s_msg);
-  m_Destroy(_datas, 2);
+  matrix_Destroy(_datas, 2);
 }
 
 /* m_Part - part of channel */
 void
-m_Part(char *chans, char *msg) {
-  char *_bPart = g_nArg(msg, 1);
+m_Part(char *dst, char *msg) {
+  char *_bPart = get_nArg(msg, 1);
   if(_bPart != NULL) {
-    b_Part(_bPart);
+    bot_Part(_bPart);
     printf("[%s%s@%s] PART: %s\n", tBlink, tCyan, tRs, _bPart);
     free(_bPart);
   }
