@@ -1,13 +1,18 @@
-/* string - constroi uma string */
+/* checkNull - checa se o ponteiro é núlo */
+int
+checkNull(void *ptr) {
+  return ptr == NULL ? true : false;
+}
 
+/* string - constroi uma string */
 char*
 string(char *str)
 {
   int i = 1;
   while(str[i - 1] != '\0') { i++; }
 
-  char *str_result = calloc(i, 1);
-  strncpy(str_result, str, i);
+  char *str_result = (char*) calloc(i, 1);
+  strncpy(str_result, str, 1);
   return str_result;
 }
 
@@ -64,36 +69,15 @@ char *realoca(char *str, int size) {
   if ( str_result == NULL ) {
     printf("Falha na realocação.\n");
     free(str);
-    exit(0);
+    return NULL;
   }
 
   return (char*) str_result;
 }
 
-// libera o ponteiro.
+/* libera o ponteiro */
 void release(void *ptr) {
   if ( ptr != NULL ) {
     free(ptr);
   }
 }
-
-/* str_Chr */
-// char*
-// str_Chr(char *str, char ch)
-// {
-//   int i=0;
-//   char *str_spl = (char*) calloc(strlen(str), 1);
-
-//   while(str[i] != ch)
-//   {
-//     if(i == strlen(str)) {
-//       free(str_spl);
-//       return NULL;
-//     }
-
-//     str_spl[i] = str[i];
-//     i++;
-//   }
-
-//   return str_spl;
-// }
