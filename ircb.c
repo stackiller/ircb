@@ -25,7 +25,7 @@
 #include "irc_funcs.c"
 #include "ssl_funcs.c"
 
-/* main - sem muito o que dizer */
+/* main - sem muito o que dizer xP */
 int
 main(int n_args, char *s_args[]) {
   
@@ -43,13 +43,13 @@ main(int n_args, char *s_args[]) {
   irc.chans = s_args[5];
 
   // Arte do cabeçalho.
-  b_Header();
+  bot_Header();
 
   irc.ctx = init_Ctx();
   irc.ssl = SSL_new(irc.ctx);
   irc.sockfd = new_Conn(irc.host, atoi(irc.port));
 
-  b_Nick(irc.nick); // identifica o usuário.
+  bot_Nick(irc.nick); // identifica o usuário.
 
   // recebe as mensagens
   do {
@@ -58,19 +58,19 @@ main(int n_args, char *s_args[]) {
     char *endOf = strstr(irc.buffer, ":End of message of the day.");
 
     if(endOf != NULL) {
-      b_Nick(irc.nick); // identifica o usuário.
-      b_Creds(irc.nick, irc.pass); // define as credenciais.
-      b_Join(irc.chans); // entra para o canal.
+      // bot_Nick(irc.nick); // identifica o usuário.
+      bot_Creds(irc.nick, irc.pass); // define as credenciais.
+      bot_Join(irc.chans); // entra para o canal.
     }
 
-    fprintf(stdout, "%s\n", irc.buffer); // exibe a entrada do buffer.
+    fprintf(stdout, "%s", irc.buffer); // exibe a entrada do buffer.
     
     if(irc.buffer != NULL) {
       free(irc.buffer);
     }
   } while(1);
 
-  // release o estado da conexão.
+  // libera o estado da conexão.
   SSL_free(irc.ssl);
   SSL_CTX_free(irc.ctx);
   close(irc.sockfd);

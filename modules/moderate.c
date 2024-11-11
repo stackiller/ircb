@@ -1,33 +1,31 @@
 /*
-  Moderate Channel,
-  functions
-
+  Funções de gerenciamento do bot,
   &Bnick, &Bjoin, &Bnick,
 */
 
-/* m_Nick - set nick */
+/* m_Nick - define um nick. */
 void
 m_Nick(char *dst, char *msg) {
   char *_bNick = get_nArg(msg, 1);
   if(_bNick != NULL) {
-    b_Nick(_bNick);
+    bot_Nick(_bNick);
     printf("[%s%s@%s] NICK: %s\n", tBlink, tYellow, tRs, _bNick);
     free(_bNick);
   }
 }
 
-/* m_Join - join into channel */
+/* m_Join - entra para um canal. */
 void
 m_Join(char *dst, char *msg) {
   char *_bJoin = get_nArg(msg, 1);
   if(_bJoin != NULL) {
-    b_Join(_bJoin);
+    bot_Join(_bJoin);
     printf("[%s%s@%s] JOIN: %s\n", tBlink, tCyan, tRs, _bJoin);
     free(_bJoin);
   }
 }
 
-/* m_Kick - kick nickname */
+/* m_Kick - chuta um nickname. */
 void
 m_Kick(char *dst, char *msg) {
   char *_datas[] = {
@@ -38,19 +36,16 @@ m_Kick(char *dst, char *msg) {
   if(matrix_haveNull(_datas, 2))
     return;
 
-  char *s_msg = (char*) calloc(B_LEN, 1);
-
-  snprintf(s_msg, B_LEN, "KICK %s %s\r\n", _datas[0], _datas[1]); // format join buffer
-
+  char *s_msg = (char*) calloc(BOT_MAX_LEN, 1);
+  snprintf(s_msg, BOT_MAX_LEN, "KICK %s %s\r\n", _datas[0], _datas[1]);
   printf("KICK %s %s\n", _datas[0], _datas[1]);
-
-  m_Send(s_msg); // send join command
+  msg_Send(s_msg);
 
   free(s_msg);
   matrix_Destroy(_datas, 2);
 }
 
-/* m_Part - part of channel */
+/* m_Part - parte de um canal. */
 void
 m_Part(char *dst, char *msg) {
   char *_bPart = get_nArg(msg, 1);
