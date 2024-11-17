@@ -50,6 +50,7 @@ main(int n_args, char *s_args[]) {
   irc.sockfd = new_Conn(irc.host, atoi(irc.port));
 
   bot_Nick(irc.nick); // identifica o usuário.
+  bot_Creds(irc.nick, irc.pass); // define as credenciais.
 
   // recebe as mensagens
   do {
