@@ -72,6 +72,7 @@ char *realoca(char *str, int size) {
     return NULL;
   }
 
+  str_result[size-1] = '\0';
   return (char*) str_result;
 }
 

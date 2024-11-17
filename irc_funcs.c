@@ -39,7 +39,7 @@ r_Buffer()
 
   // fragmenta os dados da mensagem numa matriz
   char *msg_Data[3] = {
-    (char*)(get_Src(buffer)),
+    get_Src(buffer),
     get_Dst(buffer),
     get_Msg(buffer)
   };
@@ -171,22 +171,24 @@ get_nArg(char *msg, int nArg_index)
   int i = 0, j = 0, k = 0;
   char *nArg = string("");
 
-  for(;i<strlen(msg);i++)
+  for(; i<strlen(msg); i++)
   {
     if(k == nArg_index)
     {
-      while((msg[i] != 32) && (msg[i] != '\0'))
+      while((msg[i] != 32) && (msg[i] != '\r'))
       {
         nArg[j] = msg[i];
         i++; j++;
-        nArg = realoca(nArg, j);
+        nArg = realoca(nArg, j+1);
         if(checkNull(nArg)) {
           return NULL;
         }
       }
       return nArg;
     }
-    else if(msg[i] == 32) k++;
+    else if(msg[i] == 32) {
+      k++;
+    }
   }
   
   free(nArg);
@@ -205,11 +207,11 @@ get_Args(char *msg)
   {
     if(k == 1)
     {
-      while((msg[i] != '\0'))
+      while((msg[i] != '\r'))
       {
         args[j] = msg[i];
         i++; j++;
-        args = realoca(args, j);
+        args = realoca(args, j+1);
         if(checkNull(args)) {
           return NULL;
         }
@@ -303,7 +305,7 @@ void
 bot_Creds(char *nick, char *pass)
 {  
   char *creds = (char*) calloc(BOT_MAX_LEN, 1); // aloca as credenciais do bot.
-  snprintf(creds, BOT_MAX_LEN, "IDENTIFY %s %s", nick, pass); // formata os buffers
+  snprintf(creds, BOT_MAX_LEN, "IDENTIFY %s %s\r\n", nick, pass); // formata os buffers
   bot_Priv(creds, "NickServ");
   free(creds);
 }
@@ -311,10 +313,10 @@ bot_Creds(char *nick, char *pass)
 
 /* bot_Join - entra para o canal. */
 void
-bot_Join(char *uChans)
+bot_Join(char *chans)
 {
   char *join = (char*) calloc(BOT_MAX_LEN*10, 1);
-  snprintf(join, BOT_MAX_LEN, "JOIN %s\r\n", uChans);
+  snprintf(join, BOT_MAX_LEN, "JOIN %s\r\n", chans);
   msg_Send(join);
   free(join);
 }
@@ -326,7 +328,7 @@ bot_Pong(char *msg)
 {
   if((strlen(msg) > 30)
   && ((strstr(msg, "PING :") == NULL)
-  || (strstr(msg, ":PING :")))) {
+  || (strstr(msg, ":PING") != NULL ))) {
     return 1;
   }
 
@@ -349,7 +351,7 @@ bot_Pong(char *msg)
 /* bot_Priv - função privmsg */
 void
 bot_Priv(char *mArg, char *mDest) {
-  char *pMsg = (char*) calloc(BOT_MAX_LEN*2, 1);
+  char *pMsg = (char*) calloc(512, 1);
   char *privmsg_models[] = {
     "PRIVMSG %s :%s\r\n",
     "PRIVMSG %s %s\r\n"
@@ -389,17 +391,20 @@ bot_Shell(char *dst, char *sh_command) {
     bot_Priv("Falha na execução do comando.", dst);
   }
    
-  int ch, size = 0;
+  int ch = 0, size = 0;
   char *out = string("");
-
-  // lê a saída do comando para a string de saída.
-  while((ch = fgetc(stream)) != EOF) {
+ 
+  while ( (ch = fgetc(stream)) != EOF ) {
     out[size] = ch;
     size++;
-    out = realoca(out, size + 1);
+    out = realoca(out, size+1);
+    if(checkNull(out)) {
+      bot_Priv("Comando com retorno nulo.", dst);
+    }
   }
 
   bot_Priv(out, dst); // envia a saída do comando.
+  memset(out, 0x0, strlen(out));
   free(out);
   pclose(stream);
 }
@@ -413,7 +418,7 @@ new_Conn(const char *hostname, int port) {
 
   // obtém o endereço ipv4 pelo nome de host.
   if((host = gethostbyname(hostname)) == NULL) {
-    printf("[@] wrong host: %s\n", hostname);
+    printf("[@] Endereço inválido: %s\n", hostname);
     exit(1);
   }
 
@@ -445,7 +450,7 @@ new_Conn(const char *hostname, int port) {
   }
   else {
     printf(
-      "[%s%s*%s] Connected with %s encryption\n",
+      "[%s%s*%s] Conectado com %s.\n",
       tGreen, tBlink, tRs, SSL_get_cipher(irc.ssl));
   }
   show_Certs(irc.ssl); // mostra os certificados.
@@ -470,6 +475,6 @@ void
 usage(char *c_name) {
   bot_Header();
   printf(
-    "Use:\n%s <server_addr> <port> <nick> \'<password>\' \'#channel1,#channel2,#channel3..\' <optional flag: --nossl>\n", c_name);
+    "Use:\n%s <server_addr> <port> <nick> \'<password>\' \'#channel1,#channel2,#channel3..\'\n", c_name);
   exit(0);
 }
