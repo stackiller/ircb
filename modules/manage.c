@@ -1,6 +1,5 @@
 /*
-  Moderate functions,
-
+  Funções de moderação,
   &Bsh
 */
 
