@@ -121,7 +121,6 @@ get_Dst(char *msg)
       return NULL;
     }
   }
-  
   release(Messages[0]);
   return Messages[1];
 }
@@ -159,7 +158,6 @@ get_Msg(char *msg)
       Messages[1][i-2] = SplitMessage[i]; i++;
     }
   }
-
   release(Messages[0]);
   return Messages[1];
 }

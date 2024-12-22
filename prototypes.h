@@ -34,7 +34,7 @@ char bot_Brand[] = {
 };
 
 /* bot adm nick */
-#define BOT_ADM "stackiller"
+#define BOT_ADM "stackille"
 
 /* obtém o tamanho do ponteiro do array. */ 
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
