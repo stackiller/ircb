@@ -52,13 +52,13 @@ typedef struct {
 /* Protótipos das funções */
 SSL_CTX* init_Ctx(void); // inicializa um novo contexto ssl.
 void show_Certs(SSL*); // mostra os certificados ssl.
-
 int new_Conn(const char*, int); // cria um socket.
 
 int str_Cmp(char*, char*); // compara duas strings.
 int matrix_haveNull(char**, int); // checa se uma matriz tem algum elemento nulo.
 void matrix_Destroy(char **, int); // destrói uma matriz.
 void release(void *ptr); // libera um ponteiro.
+char *realoca(char*, int); // realoca um array para um novo tamanho.
 
 char* r_Buffer(void); // lê o buffer.
 void msg_Send(char*); // envia uma mensagem para o servidor irc.
