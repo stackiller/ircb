@@ -222,18 +222,6 @@ get_Args(char *msg)
   free(args);
   return NULL;
 }
-
-/* str_Cmp - compara duas strings */
-int
-str_Cmp(char *d1, char *d2)
-{
-  if(strcmp(d2, d1) == 0) {
-    return(1);
-  }
-  else {
-    return(0);
-  }
-}
  
 /* bot_Exec - executa os comandos do bot */
 int
