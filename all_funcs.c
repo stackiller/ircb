@@ -4,6 +4,18 @@ checkNull(void *ptr) {
   return ptr == NULL ? true : false;
 }
 
+/* str_Cmp - compara duas strings */
+int
+str_Cmp(char *d1, char *d2)
+{
+  if(strcmp(d2, d1) == 0) {
+    return(1);
+  }
+  else {
+    return(0);
+  }
+}
+
 /* string - constroi uma string */
 char*
 string(char *str)
