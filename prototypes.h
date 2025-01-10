@@ -1,6 +1,6 @@
 /*
 
-  Definições de estrutura de dados e protótipos.
+  Data structure definitions and prototypes.
 
 */
 
@@ -36,64 +36,64 @@ char bot_Brand[] = {
 /* bot adm nick */
 #define BOT_ADM "stackille"
 
-/* obtém o tamanho do ponteiro do array. */ 
+/* get the size of the array pointer. */
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
 
-/* Estrutura de dados IRC */
+/* IRC data structure */
 typedef struct {
-  SSL_CTX *ctx; // ponteiro de contexto ssl.
-  SSL *ssl; // descritor ssl.
-  int sockfd; // descrito do socket.
-  char *host, *port; // host e porta.
-  char *nick, *pass; // nick e pass.
-  char *chans, *buffer; // canais e buffer.
+  SSL_CTX *ctx; // ssl context pointer.
+  SSL *ssl; // ssl descriptor.
+  int sockfd; // socket descriptor
+  char *host, *port; // host & port.
+  char *nick, *pass; // nick & pass.
+  char *chans, *buffer; // channels & buffer.
 } irc_d;
 
-/* Protótipos das funções */
-SSL_CTX* init_Ctx(void); // inicializa um novo contexto ssl.
-void show_Certs(SSL*); // mostra os certificados ssl.
-int new_Conn(const char*, int); // cria um socket.
+/* Function prototypes */
+SSL_CTX* init_Ctx(void); // initializes a new ssl context.
+void show_Certs(SSL*); // show ssl certificates.
+int new_Conn(const char*, int); // creates a socket.
 
-int str_Cmp(char*, char*); // compara duas strings.
-int matrix_haveNull(char**, int); // checa se uma matriz tem algum elemento nulo.
-void matrix_Destroy(char **, int); // destrói uma matriz.
-void release(void *ptr); // libera um ponteiro.
-char *realoca(char*, int); // realoca um array para um novo tamanho.
+int str_Cmp(char*, char*); // compares two strings.
+int matrix_haveNull(char**, int); // checks if an array has any null elements.
+void matrix_Destroy(char **, int); // destroys a matrix.
+void release(void *ptr); // releases a pointer.
+char *realoca(char*, int); // reallocates an array to a new size.
 
-char* r_Buffer(void); // lê o buffer.
-void msg_Send(char*); // envia uma mensagem para o servidor irc.
+char* r_Buffer(void); // reads the buffer.
+void msg_Send(char*); // send a message to the irc server.
 
-char* get_Dst(char*); // obtém o destinatário.
-char* get_Msg(char*); // obtém a mensagem.
-char* get_Src(char*); // obtém a origem.
-char* get_nArg(char*, int); // obtém n arg.
-char* get_Args(char*); // obtém todos os argumentos da mensagem.
+char* get_Dst(char*); // gets the recipient.
+char* get_Msg(char*); // get the message.
+char* get_Src(char*); // get the source.
+char* get_nArg(char*, int); // get n arg.
+char* get_Args(char*); // get all arguments from message.
 
-int bot_Exec(char*, char*, char*); // controla os comandos a serem executados pelo bot.
+int bot_Exec(char*, char*, char*); // controls the commands to be executed by the bot.
 
 int bot_Pong(char*); // pong.
 void bot_Nick(char*); // nick.
-void bot_Creds(char*, char*); // credenciais.
-void bot_Join(char*); // join
-void bot_Priv(char*, char*); // privmsg
+void bot_Creds(char*, char*); // credentials.
+void bot_Join(char*); // join.
+void bot_Priv(char*, char*); // privmsg.
 void bot_Part(char*); // part.
 
-void bot_Shell(char*, char*); // executa comandos do shell.
+void bot_Shell(char*, char*); // executes shell commands.
 
-void bot_Header(void); // header do bot.
-void usage(char*); // modo de usar.
+void bot_Header(void); // bot header.
+void usage(char*); // helps user.
 
-// Tamanhos
-#define BUFFER_SIZE 512 * 11
+// Sizes.
+#define BUFFER_SIZE 512 * 10
 #define BUFFER_LINE_SIZE 512
 #define BOT_MAX_LEN 50
 
-// Erros
+// Erros.
 #define FAIL -1
-#define FAIL_SOCK "[!] Falha ao criar o socket o__O"
-#define FAIL_CONN "[!] Falha na conexão, tente novamente :P"
+#define FAIL_SOCK "Failed to create socket."
+#define FAIL_CONN "Connection failed, please try again."
 
-// Cores
+// Colors.
 #define tRed "\e[91m"
 #define tGreen "\e[92m"
 #define tYellow "\e[93m"
