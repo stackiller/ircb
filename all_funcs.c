@@ -1,10 +1,10 @@
-/* checkNull - checa se o ponteiro é núlo */
+/* Checks if the pointer is null. */
 int
 checkNull(void *ptr) {
   return ptr == NULL ? true : false;
 }
 
-/* str_Cmp - compara duas strings */
+/* Compares two strings. */
 int
 str_Cmp(char *d1, char *d2)
 {
@@ -16,7 +16,7 @@ str_Cmp(char *d1, char *d2)
   }
 }
 
-/* string - constroi uma string */
+/* Builds a string. */
 char*
 string(char *str)
 {
@@ -28,7 +28,7 @@ string(char *str)
   return str_result;
 }
 
-/* matrix_Destroy - destroi uma matriz bidmensional */
+/* Destroys a two-dimensional array. */
 void
 matrix_Destroy(char **m, int mSize)
 {
@@ -38,7 +38,7 @@ matrix_Destroy(char **m, int mSize)
   }
 }
 
-/* m_haveNull - checa se há algum elemento nulo na matriz */
+/* Checks if there is any null element in the array. */
 int 
 matrix_haveNull(char **m, int mSize)
 {
@@ -50,7 +50,7 @@ matrix_haveNull(char **m, int mSize)
   return 0;
 }
 
-/* Split - divide a mensagem de acordo com o intervalo ch1 ao ch2 */
+/* Splits the message according to the range ch1 to ch2. */
 char*
 split(char *str, char ch1, char ch2)
 {
@@ -74,7 +74,7 @@ split(char *str, char ch1, char ch2)
   return NULL;
 }
 
-/* realoca - Realoca o tamanho do ponteiro */
+/* Reallocates the size of the pointer. */
 char *realoca(char *str, int size) {
   char *str_result = (char*) reallocarray(str, size, 1);
 
@@ -88,7 +88,7 @@ char *realoca(char *str, int size) {
   return (char*) str_result;
 }
 
-/* libera o ponteiro */
+/* Frees the pointer with null check. */
 void release(void *ptr) {
   if ( ptr != NULL ) {
     free(ptr);
