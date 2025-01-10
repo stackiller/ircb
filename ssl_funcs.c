@@ -1,26 +1,71 @@
-/* initialize the SSL engine */
+/* Creates a new socket connection. */
+int
+new_Conn(const char *hostname, int port) {
+  static struct sockaddr_in server; // struct sockaddr_in.
+  struct hostent *host; // struct hostent.
+  int sockfd; // socket descriptor.
+
+  // get ipv4 address by hostname.
+  if((host = gethostbyname(hostname)) == NULL) {
+    printf("[@] Endereço inválido: %s\n", hostname);
+    exit(1);
+  }
+
+  // creates a TCP/IP socket.
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if(sockfd < 0) {
+    close(sockfd);
+    perror(FAIL_SOCK);
+  }
+ 
+  // assigns the connection data to the fields.
+  server.sin_family = AF_INET; 
+  server.sin_port = htons(port);
+  server.sin_addr.s_addr = *(long*)(host->h_addr);
+  memset(&server.sin_zero, 0x0, 8);
+
+  // connects to the IRC server.
+  if((connect(sockfd, (struct sockaddr*) &server, sizeof(server))) != 0) {
+    close(sockfd);
+    perror(FAIL_CONN);
+  }
+
+  // attaches the SSL context to the socket.
+  SSL_set_fd(irc.ssl, sockfd);
+
+  // initializes the ssl connection to the IRC server.
+  if(SSL_connect(irc.ssl) == FAIL) {
+    ERR_print_errors_fp(stderr);
+    exit(1);
+  }
+  else {
+    printf(
+      "[%s%s*%s] Conectado com %s.\n",
+      tGreen, tBlink, tRs, SSL_get_cipher(irc.ssl));
+  }
+  show_Certs(irc.ssl); // show certificates.
+
+  return sockfd;
+}
+
+/* Initialize the SSL engine */
 SSL_CTX*
 init_Ctx(void)
 {
-  // SSL metho and context
   const SSL_METHOD *method; // SSL method pointer
   SSL_CTX *ctx; // SSL context pointer
  
-  // Load OpenSSL chipers and et.all - erros messages
-  OpenSSL_add_all_algorithms(); // load cryptos, and et.all
-  SSL_load_error_strings(); // bring and register error messages
-
   // create new method and context
-  method = SSLv23_client_method(); // create new client-method instance
+  method = TLS_method(); // create new client-method instance
   ctx = SSL_CTX_new(method); // create new SSL context
   if(ctx == NULL)
   {
     ERR_print_errors_fp(stderr);
-    abort();
+    exit(1);
   } return(ctx);  // return SSL context
 }
 
-/* show certificates function */
+/* Show certificates */
 void
 show_Certs(SSL *ssl)
 {
@@ -41,6 +86,7 @@ show_Certs(SSL *ssl)
     // get issuer name
     line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0); // get the issuer.
     printf("|_ Issuer: %s\n", line); // show issuer certificate.
+    
     free(line); // free the malloc'ed string
     X509_free(cert); // free the malloc'ed certificate copy
    }
