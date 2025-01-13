@@ -45,9 +45,8 @@ main(int n_args, char *s_args[]) {
   // header art.
   bot_Header();
 
-  irc.ctx = init_Ctx();
-  irc.ssl = SSL_new(irc.ctx);
-  irc.sockfd = new_Conn(irc.host, atoi(irc.port));
+  // init connection state.
+  init_conn(&irc);
 
   bot_Nick(irc.nick); // identifies the user.
   bot_Creds(irc.nick, irc.pass); // sets credentials.
@@ -66,10 +65,8 @@ main(int n_args, char *s_args[]) {
     release(irc.buffer);
   } while(1);
 
-  // releases the connection state.
-  SSL_free(irc.ssl);
-  SSL_CTX_free(irc.ctx);
-  close(irc.sockfd);
-  
+  // end connection state.
+  end_conn(&irc);
+
   return(0);
 }
