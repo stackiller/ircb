@@ -52,7 +52,9 @@ typedef struct {
 /* Function prototypes */
 SSL_CTX* init_Ctx(void); // initializes a new ssl context.
 void show_Certs(SSL*); // show ssl certificates.
-int new_Conn(const char*, int); // creates a socket.
+int new_conn(const char*, int); // creates a socket.
+int init_conn(irc_d *irc); // init connection.
+int end_conn(irc_d *irc); // end connection.
 
 int str_Cmp(char*, char*); // compares two strings.
 int matrix_haveNull(char**, int); // checks if an array has any null elements.
