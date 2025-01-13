@@ -1,6 +1,6 @@
 /* Creates a new socket connection. */
 int
-new_Conn(const char *hostname, int port) {
+new_conn(const char *hostname, int port) {
   static struct sockaddr_in server; // struct sockaddr_in.
   struct hostent *host; // struct hostent.
   int sockfd; // socket descriptor.
@@ -92,4 +92,21 @@ show_Certs(SSL *ssl)
    }
    else
     printf("[?] no certificates.\n");
+}
+
+// init connection;
+int init_conn(irc_d *irc) {
+  irc->ctx = init_Ctx();
+  irc->ssl = SSL_new(irc->ctx);
+  irc->sockfd = new_conn(irc->host, atoi(irc->port));
+  return 0;
+}
+
+// end connection;
+int end_conn(irc_d *irc) {
+  while(SSL_shutdown(irc->ssl) <=0 );
+  SSL_free(irc->ssl);
+  SSL_CTX_free(irc->ctx);
+  close(irc->sockfd);
+  return 0;
 }
