@@ -311,10 +311,7 @@ bot_Join(char *chans)
 int
 bot_Pong(char *msg)
 {
-  if(
-    (strlen(msg) > 60) &&
-    ( checkNull(strstr(msg, "PING :")) || checkNull(strstr(msg, ":PING")) )
-  ) {
+  if(msg[0] == ':') {
     return 1;
   }
 
