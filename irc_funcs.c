@@ -15,13 +15,10 @@ r_Buffer()
   int bytes, tBytes = 0;
 
   char *buffer = (char*) calloc(BUFFER_SIZE, 1);
-  char buffer_lines[BUFFER_LINE_SIZE] = {};
-
-  memset(buffer_lines, 0x0, BUFFER_LINE_SIZE);
+  char *buffer_lines = (char*) calloc(BUFFER_LINE_SIZE, 1);
 
   // reads the data and concatenates it into the buffer.
   do {
-    memset(buffer_lines, 0x0, BUFFER_LINE_SIZE);
     bytes = SSL_read(irc.ssl, buffer_lines, BUFFER_LINE_SIZE);
 
     if(bytes <= 0)
@@ -29,8 +26,10 @@ r_Buffer()
     tBytes += bytes;
 
     strcat(buffer, buffer_lines);
+    memset(buffer_lines, '\0', BUFFER_LINE_SIZE);
   } while(SSL_pending(irc.ssl));
-  
+
+  release(buffer_lines);
 
   // responds to ping.
   if((bot_Pong(buffer)) == 0) {
