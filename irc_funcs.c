@@ -61,22 +61,22 @@ r_Buffer()
 char*
 get_Src(char *msg)
 {
-  char ch_intervals[] = {'!', '@'};
+  char limits[] = {':', '!'};
   int i = 0, j=0;
   char *src_host = (char*) calloc(20,1);
   char *split_msg;
 
-  char ignored_characters[] = {'!', '~', '+', '@', '%'};
+  char ign_chs[] = {':', '!', '~', '+', '@', '%'};
 
-  split_msg = strchr(msg, ch_intervals[0]);
+  split_msg = strchr(msg, limits[0]);
 
   if(checkNull(split_msg)) {
-    free(src_host);
+    release(src_host);
     return NULL;
   }
 
-  for(int c=0; c < 4; c++) {
-    if(split_msg[i] == ignored_characters[c]) {
+  for(int c=0; c < 5; c++) {
+    if(split_msg[i] == ign_chs[c]) {
       i++;
     }
   }
@@ -84,7 +84,12 @@ get_Src(char *msg)
   do {
     src_host[j] = split_msg[i];
     i++; j++;
-  } while(split_msg[i] != ch_intervals[1] && i < 20);
+  } while(split_msg[i] != limits[1] && i < 20);
+
+  if(i == 20) {
+    release(src_host);
+    return NULL;
+  }
 
   return src_host;
 }
