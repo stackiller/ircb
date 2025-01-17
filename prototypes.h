@@ -34,7 +34,7 @@ char bot_Brand[] = {
 };
 
 /* bot adm nick */
-#define BOT_ADM "stackille"
+#define BOT_ADM "stackiller"
 
 /* get the size of the array pointer. */
 #define ARRAY_SIZE(x) ((sizeof(x)) / (sizeof(x[0])))
