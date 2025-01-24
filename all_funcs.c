@@ -16,6 +16,19 @@ str_Cmp(char *d1, char *d2)
   }
 }
 
+/* Compare if ch is different from the elements of the chs array */
+int
+diff(char ch, char *chs) {
+  for(int i=0; i < strlen(chs); i++) {
+    if(ch != chs[i] && ch != '\0') {
+      continue;
+    } else {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 /* Builds a string. */
 char*
 string(char *str)
