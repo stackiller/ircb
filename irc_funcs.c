@@ -166,34 +166,34 @@ get_Msg(char *msg)
   return Messages[1];
 }
 
-/* Get the n arg. */ 
+/* Get the n arg of a message. */ 
 char*
-get_nArg(char *msg, int nArg_index)
+get_nArg(char *msg, int n_arg_index)
 {
   int i = 0, j = 0, k = 0;
-  char *nArg = string("");
+  char *n_arg = string("");
 
   for(; i<strlen(msg); i++)
   {
-    if(k == nArg_index)
+    if(k == n_arg_index)
     {
-      while((msg[i] != 32) && (msg[i] != '\r'))
+      while(!diff(msg[i], (char[]) {'\r', '\n', ' '}))
       {
-        nArg[j] = msg[i];
+        n_arg[j] = msg[i];
         i++; j++;
-        nArg = realoca(nArg, j+1);
-        if(checkNull(nArg)) {
+        n_arg = realoca(n_arg, j+1);
+        if(checkNull(n_arg)) {
           return NULL;
         }
       }
-      return nArg;
+      return n_arg;
     }
     else if(msg[i] == 32) {
       k++;
     }
   }
   
-  free(nArg);
+  free(n_arg);
   return NULL;
 }
 
@@ -266,7 +266,7 @@ bot_Exec(char *src, char *dst, char *msg)
     }
   }
 
-  free(_msg);
+  matrix_Destroy((char*[]){_msg, _cKey}, 2);
   return 0;
 }
 
@@ -296,7 +296,7 @@ bot_Creds(char *nick, char *pass)
   char *creds = (char*) calloc(BOT_MAX_LEN, 1); // allocates the bot's credentials.
   snprintf(creds, BOT_MAX_LEN, "IDENTIFY %s %s\r\n", nick, pass); // formats the buffers.
   bot_Priv(creds, "NickServ");
-  free(creds);
+  release(creds);
 }
 
 
@@ -307,7 +307,7 @@ bot_Join(char *chans)
   char *join = (char*) calloc(BOT_MAX_LEN*10, 1);
   snprintf(join, BOT_MAX_LEN, "JOIN %s\r\n", chans);
   msg_Send(join);
-  free(join);
+  release(join);
 }
 
 
@@ -315,10 +315,10 @@ bot_Join(char *chans)
 int
 bot_Pong(char *msg)
 {
-  if(msg[0] == ':') {
+  if((strncmp("PING :", msg, 6)) != 0) {
     return 1;
   }
-
+ 
   char *ping;
   char *datas[] = {
     (char*) calloc(strlen(msg), 1), // copy of the original message.
@@ -346,6 +346,7 @@ bot_Priv(char *mArg, char *mDest) {
 
   // split the message into lines and send them separately.
   char *line = strtok(mArg, "\n");
+
   while (line != NULL) {
     mDest[0] == '#' ?
       snprintf(pMsg, BOT_MAX_LEN*2, privmsg_models[1], mDest, line) :
@@ -356,7 +357,7 @@ bot_Priv(char *mArg, char *mDest) {
     line = strtok(NULL, "\n");
   }
 
-  free(pMsg);
+  release(pMsg);
 }
 
 /* Part of the channel. */
