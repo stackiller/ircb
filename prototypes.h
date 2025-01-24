@@ -57,6 +57,7 @@ int init_conn(irc_d *irc); // init connection.
 int end_conn(irc_d *irc); // end connection.
 
 int str_Cmp(char*, char*); // compares two strings.
+int diff(char, char*); // compare if ch is different from the elements of the chs array.
 int matrix_haveNull(char**, int); // checks if an array has any null elements.
 void matrix_Destroy(char **, int); // destroys a matrix.
 void release(void *ptr); // releases a pointer.
