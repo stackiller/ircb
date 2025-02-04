@@ -208,7 +208,7 @@ get_Args(char *msg)
   {
     if(k == 1)
     {
-      while((msg[i] != '\r'))
+      while((msg[i] != '\0'))
       {
         args[j] = msg[i];
         i++; j++;
@@ -239,7 +239,7 @@ bot_Exec(char *src, char *dst, char *msg)
 
   // command keys.
   char *_modKeys[] = {
-    "bjoin\0", "bnick\0", "bkick\0", "bpart\0", "bsh\0"
+    "bjoin", "bnick", "bkick", "bpart", "bsh"
   };
  
   // module function selection list.
@@ -248,7 +248,7 @@ bot_Exec(char *src, char *dst, char *msg)
   };
 
   // compares the userhost, in order to execute only if it is the adm.
-  if(!strcmp(src, BOT_ADM))
+  if(str_Cmp(src, BOT_ADM))
   {
     for(int i=0; i<ARRAY_SIZE(_modKeys); i++)
     {
