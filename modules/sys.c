@@ -6,6 +6,7 @@
 the scope of the file should be listed here using extern */
 extern char *string(char*);
 extern int checkNull(void*);
+extern char *string_realloc(char*, int);
 
 /* Gateway to bot_Shell. */
 void
@@ -13,7 +14,7 @@ sys_Sh(char *dst, char *msg) {
   char *_bSh = get_Args(msg);
   if(_bSh != NULL) {
     bot_Shell(dst, _bSh);
-    release(_bSh);
+    null_safe_release(_bSh);
   }
 }
 
@@ -33,7 +34,7 @@ bot_Shell(char *dst, char *sh_command) {
   while ( (ch = fgetc(stream)) != EOF ) {
     out[size] = ch;
     size++;
-    out = realoca(out, size+1);
+    out = string_realloc(out, size+1);
     if(checkNull(out)) {
       bot_Priv("Comando com retorno nulo.", dst);
     }
