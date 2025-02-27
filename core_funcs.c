@@ -2,6 +2,19 @@
     Core functions.
 */
 
+/* Bot header art. */
+void
+bot_Header() {
+  printf("%s %s %s\n", tGreen, bot_Brand, tRs);
+}
+
+/* Helps the user. */
+void
+usage(char *c_name) {
+  bot_Header();
+  printf("Use:\n%s <server_addr> <port> <nick> \'<password>\' \'#channel1,#channel2,#channel3..\'\n", c_name);
+}
+
 /* Checks if the pointer is null. */
 int checkNull(void *ptr) { return ptr == NULL ? true : false; }
 
@@ -49,7 +62,7 @@ char *string_realloc(char *str, int size) {
 
   if ( str_result == NULL ) {
     printf("Fail to reallocate string: %s\n", str);
-    release(str);
+    free(str);
     return NULL;
   }
 
@@ -96,7 +109,7 @@ void
 matrix_Destroy(char **matrix, int size)
 {
   for(int i=0; i < size; i++)
-    release(matrix[i]);
+    free(matrix[i]);
 }
 
 /* Reads the matrix buffer. */
@@ -108,7 +121,7 @@ read_matrix_Buffer(char **matrix, int size)
 }
 
 /* Checks if there is any null element in the matrix. */
-int 
+int
 matrix_haveNull(char **matrix, int size)
 {
   for(int i=0; i < size; i++) {
@@ -120,7 +133,7 @@ matrix_haveNull(char **matrix, int size)
 }
 
 /* Frees the pointer with null check. */
-void release(void *ptr)
+void null_safe_release(void *ptr)
 {
   if ( ptr != NULL ) {
     free(ptr);
