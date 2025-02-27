@@ -52,6 +52,7 @@ r_Buffer(int *buffer_matrix_size)
     // join to channels.
     if(join_flag == 0) {
       if((get_Code(buffer_matrix[index])) == 376) {
+        bot_Creds(irc.nick, irc.pass);
         bot_Join(irc.chans);
         join_flag = 1;
       };
