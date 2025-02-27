@@ -18,17 +18,17 @@
 
 #include "prototypes.h"
 
-#include "modules/core.c" // core funcs of bot.
-#include "modules/sys.c" // system functions.
+#include "modules/core.c" // core bot functions.
+#include "modules/sys.c" // bot system functions.
 
-#include "all_funcs.c"
+#include "core_funcs.c"
 #include "irc_funcs.c"
 #include "ssl_funcs.c"
 
-/* Main xP */
+/* Main :D */
 int
-main(int n_args, char *s_args[]) {
-  
+main(int n_args, char *s_args[])
+{
   // check the number of arguments.
   if(n_args < 6) {
     usage(s_args[0]);
@@ -51,18 +51,14 @@ main(int n_args, char *s_args[]) {
   bot_Nick(irc.nick); // identifies the user.
   bot_Creds(irc.nick, irc.pass); // sets credentials.
 
-  // receive the messages
+  // receive the messages.
   do {
-    irc.buffer = r_Buffer(); // reads the buffer.
+    irc.buffer_matrix = r_Buffer(&irc.buffer_matrix_size);
 
-    char *endOf = strstr(irc.buffer, ":End of message of the day.");
-
-    if(endOf != NULL) {
-      bot_Join(irc.chans); // join to channels.
+    if(irc.buffer_matrix_size > 0) {
+      read_matrix_Buffer(irc.buffer_matrix, irc.buffer_matrix_size);
+      matrix_Destroy(irc.buffer_matrix, irc.buffer_matrix_size);
     }
-
-    fprintf(stdout, "%s", irc.buffer); // show the received messages.
-    release(irc.buffer);
   } while(1);
 
   // end connection state.
