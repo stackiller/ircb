@@ -94,7 +94,7 @@ show_Certs(SSL *ssl)
     printf("[?] no certificates.\n");
 }
 
-// init connection;
+/* Init connection */;
 int init_conn(irc_d *irc) {
   irc->ctx = init_Ctx();
   irc->ssl = SSL_new(irc->ctx);
@@ -102,7 +102,7 @@ int init_conn(irc_d *irc) {
   return 0;
 }
 
-// end connection;
+/* End connection */;
 int end_conn(irc_d *irc) {
   while(SSL_shutdown(irc->ssl) <=0 );
   SSL_free(irc->ssl);
