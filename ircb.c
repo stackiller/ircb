@@ -49,7 +49,6 @@ main(int n_args, char *s_args[])
   init_conn(&irc);
 
   bot_Nick(irc.nick); // identifies the user.
-  bot_Creds(irc.nick, irc.pass); // sets credentials.
 
   // receive the messages.
   do {
