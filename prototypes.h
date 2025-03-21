@@ -48,15 +48,21 @@ typedef struct {
   char *nick, *pass; // nick & pass.
   char *chans, **buffer_matrix; // channels & buffer.
   int buffer_matrix_size;
+  int pong;
+  int reconnect;
 } irc_d;
+
+void *check_Timeout(void*);
+void* thread_recv(void *);
 
 /* Function prototypes */
 SSL_CTX* init_Ctx(void); // initializes a new ssl context.
 void show_Certs(SSL*); // show ssl certificates.
 
 int new_conn(const char*, int); // creates a socket.
-int init_conn(irc_d *irc); // init connection.
-int end_conn(irc_d *irc); // end connection.
+int init_conn(irc_d *); // init connection.
+int end_conn(irc_d *); // end connection.
+int recon_conn(irc_d*); // reconnect connection.
 
 int checkNull(void*); // checks if the pointer is null.
 int str_Cmp(char*, char*); // compares two strings.
@@ -95,6 +101,8 @@ void bot_Creds(char*, char*); // credentials.
 void bot_Join(char*); // join.
 void bot_Priv(char*, char*); // privmsg.
 void bot_Part(char*); // part.
+void bot_Quit(void); // quit.
+void bot_Reconnect(void); // reconnect.
 void bot_Shell(char*, char*); // executes shell commands.
 
 void bot_Header(void); // bot header.
@@ -106,19 +114,15 @@ void usage(char*); // helps user.
 #define BOT_MAX_LEN 50
 
 // Messages.
-#define PART_MESSAGE "bye :P"
-
-// Erros.
-#define FAIL -1
-#define FAIL_SOCK "Failed to create socket."
-#define FAIL_CONN "Connection failed, please try again."
+#define PART_MESSAGE "still on the server, just keeping an eye on it ..."
+#define QUIT_MESSAGE "./kernel_panic"
 
 // Colors.
-#define tRed "\e[91m"
-#define tGreen "\e[92m"
-#define tYellow "\e[93m"
-#define tBlue "\e[94m"
-#define tCyan "\e[96m"
+#define fReg "\e[91m"
+#define fGreen "\e[92m"
+#define fYellow "\e[93m"
+#define fBlue "\e[94m"
+#define fCyan "\e[96m"
 
-#define tRs "\e[0m"
-#define tBlink "\e[5m"
+#define fRs "\e[0m"
+#define fBlink "\e[5m"
