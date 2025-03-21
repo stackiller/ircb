@@ -483,7 +483,7 @@ void*
 check_Timeout(void *unsed)
 {
   do {
-    sleep(10);
+    sleep(60 * 5);
     if(irc.pong == 0) {
       irc.reconnect = 1;
     } else {
