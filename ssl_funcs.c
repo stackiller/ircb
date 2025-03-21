@@ -1,21 +1,23 @@
 /* Creates a new socket connection. */
 int
-new_conn(const char *hostname, int port) {
+new_conn(const char *hostname, int port)
+{
   static struct sockaddr_in server; // struct sockaddr_in.
   struct hostent *host; // struct hostent.
   int sockfd; // socket descriptor.
 
   // get ipv4 address by hostname.
   if((host = gethostbyname(hostname)) == NULL) {
-    printf("[@] Endereço inválido: %s\n", hostname);
-    exit(1);
+    printf("(%s*%s%s) Invalid address: %s\n", fYellow, fBlink, fRs, hostname);
+    return -1;
   }
 
   // creates a TCP/IP socket.
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(sockfd < 0) {
-    close(sockfd);
-    perror(FAIL_SOCK);
+    free(host);
+    perror("new_conn");
+    return -1;
   }
  
   // assigns the connection data to the fields.
@@ -26,25 +28,30 @@ new_conn(const char *hostname, int port) {
 
   // connects to the IRC server.
   if((connect(sockfd, (struct sockaddr*) &server, sizeof(server))) != 0) {
+    free(host);
     close(sockfd);
-    perror(FAIL_CONN);
+    perror("new_conn");
+    return -1;
   }
 
   // attaches the SSL context to the socket.
   SSL_set_fd(irc.ssl, sockfd);
 
   // initializes the ssl connection to the IRC server.
-  if(SSL_connect(irc.ssl) == FAIL) {
+  if(SSL_connect(irc.ssl) == 0)
+  {
+    free(host);
+    close(sockfd);
     ERR_print_errors_fp(stderr);
-    exit(1);
+    return -1;
   }
-  else {
+  else
+  {
     printf(
       "[%s%s*%s] Conectado com %s.\n",
-      tGreen, tBlink, tRs, SSL_get_cipher(irc.ssl));
+      fGreen, fBlink, fRs, SSL_get_cipher(irc.ssl));
   }
   show_Certs(irc.ssl); // show certificates.
-
   return sockfd;
 }
 
@@ -95,18 +102,39 @@ show_Certs(SSL *ssl)
 }
 
 /* Init connection */;
-int init_conn(irc_d *irc) {
+int init_conn(irc_d *irc)
+{
   irc->ctx = init_Ctx();
   irc->ssl = SSL_new(irc->ctx);
-  irc->sockfd = new_conn(irc->host, atoi(irc->port));
+  
+  /* keep trying to create a new connection until successul. */
+  while((irc->sockfd = new_conn(irc->host, atoi(irc->port))) < 0) {
+    sleep(10);
+  }
+
+  for(int i=0; i < 3; i++)
+    bot_Nick(irc->nick); // identifies the user.
+
   return 0;
 }
 
-/* End connection */;
-int end_conn(irc_d *irc) {
-  while(SSL_shutdown(irc->ssl) <=0 );
+/* End connection */
+int
+end_conn(irc_d *irc)
+{
+  SSL_shutdown(irc->ssl);
   SSL_free(irc->ssl);
-  SSL_CTX_free(irc->ctx);
   close(irc->sockfd);
+  SSL_CTX_free(irc->ctx);
+  return 0;
+}
+
+/* End connection */
+int
+recon_conn(irc_d *irc)
+{
+  end_conn(irc);
+  init_conn(irc);
+  irc->reconnect = 0;
   return 0;
 }
