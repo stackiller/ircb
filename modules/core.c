@@ -2,13 +2,21 @@
   Core functions of bot,
 */
 
+extern irc_d irc;
+
+/* Sets a new nick. */
+void
+core_Reconnect(char *unsed, char *unsed0) {
+  recon_conn(&irc);
+}
+
 /* Sets a new nick. */
 void
 core_Nick(char *dst, char *msg) {
   char *_bNick = get_nArg(msg, 1);
   if(_bNick != NULL) {
     bot_Nick(_bNick);
-    printf("[%s%s@%s] NICK: %s\n", tBlink, tYellow, tRs, _bNick);
+    printf("[%s%s@%s] NICK: %s\n", fBlink, fYellow, fRs, _bNick);
     free(_bNick);
   }
 }
@@ -19,7 +27,7 @@ core_Join(char *dst, char *msg) {
   char *_bJoin = get_nArg(msg, 1);
   if(_bJoin != NULL) {
     bot_Join(_bJoin);
-    printf("[%s%s@%s] JOIN: %s\n", tBlink, tCyan, tRs, _bJoin);
+    printf("[%s%s@%s] JOIN: %s\n", fBlink, fCyan, fRs, _bJoin);
     free(_bJoin);
   }
 }
@@ -32,8 +40,9 @@ core_Kick(char *dst, char *msg) {
     get_nArg(msg, 2)
   };
 
-  if(matrix_haveNull(_datas, 2))
+  if(matrix_haveNull(_datas, 2)) {
     return;
+  }
 
   char *s_msg = (char*) calloc(BOT_MAX_LEN, 1);
   snprintf(s_msg, BOT_MAX_LEN, "KICK %s %s\r\n", _datas[0], _datas[1]);
@@ -50,7 +59,13 @@ core_Part(char *dst, char *msg) {
   char *_bPart = get_nArg(msg, 1);
   if(_bPart != NULL) {
     bot_Part(_bPart);
-    printf("[%s%s@%s] PART: %s\n", tBlink, tCyan, tRs, _bPart);
+    printf("[%s%s@%s] PART: %s\n", fBlink, fCyan, fRs, _bPart);
     free(_bPart);
   }
+}
+
+/* Identify the bot. */
+void
+core_Identify(char *dst, char *msg) {
+  bot_Creds(irc.nick, irc.pass);
 }
