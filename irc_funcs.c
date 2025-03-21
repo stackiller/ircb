@@ -5,6 +5,8 @@
 
 */
 
+int bot_Pong_called = 0;
+
 /* initializes a new connection data structure. */
 irc_d irc;
 
@@ -12,7 +14,12 @@ irc_d irc;
 char**
 r_Buffer(int *buffer_matrix_size)
 {
-  static int join_flag = 0;
+  if(irc.reconnect) {
+    *buffer_matrix_size = 0;
+    return NULL;
+  }
+
+  int join_flag = 0;
   int bytes, tBytes = 0;
 
   char **buffer_matrix;
@@ -35,9 +42,11 @@ r_Buffer(int *buffer_matrix_size)
 
   free(buffer_lines);
 
+  *buffer_matrix_size = tBytes;
   buffer_matrix = format_Buffer(buffer, buffer_matrix_size);
 
   if(checkNull(buffer_matrix)) {
+    *buffer_matrix_size = 0;
     free(buffer);
     return NULL;
   }
@@ -48,10 +57,12 @@ r_Buffer(int *buffer_matrix_size)
     if((bot_Pong(buffer_matrix[index])) == 0) {
       return buffer_matrix;
     }
+
+    int lbuffer_line_code = get_Code(buffer_matrix[index]);
     
     // join to channels.
     if(join_flag == 0) {
-      if((get_Code(buffer_matrix[index])) == 376) {
+      if(lbuffer_line_code == 376) {
         bot_Creds(irc.nick, irc.pass);
         bot_Join(irc.chans);
         join_flag = 1;
@@ -294,6 +305,7 @@ get_Args(char *lbuffer)
 /* Get code message. */
 int
 get_Code(char *lbuffer) {
+  int rcode;
   char *lbuffer_copy = (char*) calloc(strlen(lbuffer) + 1, 1);
   strcpy(lbuffer_copy, lbuffer);
 
@@ -303,8 +315,10 @@ get_Code(char *lbuffer) {
     return 0;
   }
 
-  free(lbuffer_copy);
-  return atoi(code);
+  rcode = atoi(code);
+  
+  matrix_Destroy((char*[]) { code, lbuffer_copy }, 2);
+  return rcode;
 }
  
 /* Execute bot commands. */
@@ -320,12 +334,12 @@ bot_Exec(char *src, char *dst, char *msg)
 
   // command keys.
   char *_modKeys[] = {
-    "bjoin", "bnick", "bkick", "bpart", "bsh"
+    ".reconnect", ".join", ".nick", ".kick", ".part", ".identify", ".sh",
   };
  
   // module function selection list.
   mod_f mod_funcs[ARRAY_SIZE(_modKeys)] = {
-    &core_Join, &core_Nick, &core_Kick, &core_Part, &sys_Sh
+    &core_Reconnect, &core_Join, &core_Nick, &core_Kick, &core_Part, &core_Identify, &sys_Sh
   };
 
   // compares the userhost, in order to execute only if it is the adm.
@@ -375,7 +389,7 @@ void
 bot_Creds(char *nick, char *pass)
 {  
   char *creds = (char*) calloc(BOT_MAX_LEN*2, 1);
-  snprintf(creds, BOT_MAX_LEN*2, "IDENTIFY %s %s\r\n", nick, pass);
+  snprintf(creds, BOT_MAX_LEN*2, "IDENTIFY %s %s", nick, pass);
   bot_Priv(creds, "NickServ");
   free(creds);
 }
@@ -390,7 +404,6 @@ bot_Join(char *chans)
   msg_Send(join);
   free(join);
 }
-
 
 /* Pong. */
 int
@@ -407,8 +420,10 @@ bot_Pong(char *msg)
   strcpy(msg_copy, msg);
   ping = strstr(msg_copy, " :");
   snprintf(pong, BOT_MAX_LEN, "PONG%s\r\n", ping);
-  printf("\n[%s%s*%s] %s\n", tBlue, tBlink, tRs, pong);
+  printf("\n[%s%s*%s] %s\n", fBlue, fBlink, fRs, pong);
   msg_Send(pong);
+
+  irc.pong = 1; // set pong flag.
 
   matrix_Destroy((char*[]) { msg_copy, pong }, 2);
   return 0;
@@ -442,8 +457,17 @@ bot_Priv(char *mArg, char *mDest) {
 /* Part of the channel. */
 void
 bot_Part(char *chans) {
+  char *privmsg = (char*) calloc(BOT_MAX_LEN*2, 1);
+  snprintf(privmsg, BOT_MAX_LEN*2, "PART %s :%s\r\n", chans, PART_MESSAGE);
+  msg_Send(privmsg);
+  free(privmsg);
+}
+
+/* Quit from server */
+void
+bot_Quit(void) {
   char *privmsg = (char*) calloc(BOT_MAX_LEN, 1);
-  snprintf(privmsg, BOT_MAX_LEN, "PART %s :%s\r\n", chans, PART_MESSAGE);
+  snprintf(privmsg, BOT_MAX_LEN, "QUIT :%s\r\n", QUIT_MESSAGE);
   msg_Send(privmsg);
   free(privmsg);
 }
@@ -452,4 +476,19 @@ bot_Part(char *chans) {
 void
 msg_Send(char *msg) {
   SSL_write(irc.ssl, msg, strlen(msg));
+}
+
+/* Check connection timeout. */
+void*
+check_Timeout(void *unsed)
+{
+  do {
+    sleep(10);
+    if(irc.pong == 0) {
+      irc.reconnect = 1;
+    } else {
+      irc.pong = 0;
+    }
+  } while(true);
+  return (void*)0;
 }
