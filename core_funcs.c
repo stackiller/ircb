@@ -5,7 +5,7 @@
 /* Bot header art. */
 void
 bot_Header() {
-  printf("%s %s %s\n", tGreen, bot_Brand, tRs);
+  printf("%s %s %s\n", fGreen, bot_Brand, fRs);
 }
 
 /* Helps the user. */
