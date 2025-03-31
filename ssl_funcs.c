@@ -84,7 +84,7 @@ show_Certs(SSL *ssl)
   cert = SSL_get_peer_certificate(ssl);
   if(cert != NULL)
   {
-    printf("Server certificates:\n"); // show message before.
+    printf("Server certificate:\n"); // show message before.
     line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0); // get subject.
 
     printf("|_ Subject: %s\n", line); // show subject.
@@ -122,10 +122,11 @@ int init_conn(irc_d *irc)
 int
 end_conn(irc_d *irc)
 {
+  global_variables_reset();
   SSL_shutdown(irc->ssl);
   SSL_free(irc->ssl);
-  close(irc->sockfd);
   SSL_CTX_free(irc->ctx);
+  close(irc->sockfd);
   return 0;
 }
 
