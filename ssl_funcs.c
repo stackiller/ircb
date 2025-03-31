@@ -48,7 +48,7 @@ new_conn(const char *hostname, int port)
   else
   {
     printf(
-      "[%s%s*%s] Conectado com %s.\n",
+      "[%s%s*%s] Connected with %s.\n",
       fGreen, fBlink, fRs, SSL_get_cipher(irc.ssl));
   }
   show_Certs(irc.ssl); // show certificates.
@@ -98,7 +98,7 @@ show_Certs(SSL *ssl)
     X509_free(cert); // free the malloc'ed certificate copy
    }
    else
-    printf("[?] no certificates.\n");
+    printf("[%s%s?%s] No certificates.\n", fYellow, fBlink, fRs);
 }
 
 /* Init connection */;
