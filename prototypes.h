@@ -73,6 +73,7 @@ char *string(char*); // initialize a new string.
 char *str_realloc(char*, int); // reallocates an array to a new size.
 
 void null_safe_release(void *ptr); // releases a pointer with null safety.
+void global_variables_reset(void); // reset global control variables.
 
 void matrix_Destroy(char **, int); // destroys a matrix.
 void read_matrix_Buffer(char**, int); // Reads the matrix buffer.
@@ -107,6 +108,9 @@ void bot_Shell(char*, char*); // executes shell commands.
 
 void bot_Header(void); // bot header.
 void usage(char*); // helps user.
+
+// Static control variables.
+int user_flag = 0; 
 
 // Sizes.
 #define BUFFER_MAX_SIZE 512 * 10
