@@ -139,3 +139,10 @@ void null_safe_release(void *ptr)
     free(ptr);
   }
 }
+
+/* Reset global control variables. */
+void
+global_variables_reset(void)
+{
+  user_flag = 0;
+}
