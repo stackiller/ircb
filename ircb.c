@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include <pthread.h>
 
@@ -31,6 +32,8 @@
 int
 main(int n_args, char *s_args[])
 {
+  signal(SIGPIPE, SIG_IGN);
+
   // check the number of arguments.
   if(n_args < 6) {
     usage(s_args[0]);
@@ -63,7 +66,6 @@ main(int n_args, char *s_args[])
 
   reconnect:
   pthread_cancel(recv_thread);
-  pthread_join(recv_thread, NULL);
   pthread_cancel(check_con);
   pthread_join(check_con, NULL);
   recon_conn(&irc);
@@ -72,7 +74,6 @@ main(int n_args, char *s_args[])
   recv_msg:
   do {
     if(irc.reconnect) {
-      bot_Quit();
       goto reconnect;
     } sleep(1);
   } while(true);
@@ -87,8 +88,8 @@ main(int n_args, char *s_args[])
 void
 thread_recv_cleanup(void *unsed)
 {
+  puts("Inside thread_recv_cleanup");
   if(irc.buffer_matrix_size > 0) {
-    read_matrix_Buffer(irc.buffer_matrix, irc.buffer_matrix_size);
     matrix_Destroy(irc.buffer_matrix, irc.buffer_matrix_size);
   }
 }
