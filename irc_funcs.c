@@ -5,8 +5,6 @@
 
 */
 
-int bot_Pong_called = 0;
-
 /* initializes a new connection data structure. */
 irc_d irc;
 
@@ -19,7 +17,6 @@ r_Buffer(int *buffer_matrix_size)
     return NULL;
   }
 
-  int join_flag = 0;
   int bytes, tBytes = 0;
 
   char **buffer_matrix;
@@ -52,28 +49,49 @@ r_Buffer(int *buffer_matrix_size)
   }
 
   int index = 0;
-  do {
-    // responds to ping.
+  do
+  {
+    // responds to ping
     if((bot_Pong(buffer_matrix[index])) == 0) {
       return buffer_matrix;
     }
 
-    int lbuffer_line_code = get_Code(buffer_matrix[index]);
+    char *lbuffer_line_command = NULL; // command code in message.
     
-    // join to channels.
-    if(join_flag == 0) {
-      if(lbuffer_line_code == 376) {
-        bot_Creds(irc.nick, irc.pass);
-        bot_Join(irc.chans);
-        join_flag = 1;
-      };
+    // check if any error occurs in connection and reset.
+    if(buffer_matrix[index][0] != ':')
+    {
+      lbuffer_line_command = get_nArg(buffer_matrix[index], 0);
+      if(str_Cmp("ERROR", lbuffer_line_command))
+      {
+        free(lbuffer_line_command);
+        irc.reconnect = 1;
+        break;
+      }
+      null_safe_release(lbuffer_line_command);
+    }
+
+    int lbuffer_line_code = get_Code(buffer_matrix[index]);
+
+    // handles messages codes
+    if(lbuffer_line_code) {
+      switch (lbuffer_line_code) {
+        case 376: // end of motd
+          bot_Creds(irc.nick, irc.pass);
+          bot_Join(irc.chans);
+          break;
+        case 433: // nick already in use
+          printf("(%s%s!%s) NICK: %s already in use.\n", fYellow, fBlink, fRs, irc.nick);
+          bot_Nick(irc.nick);
+          sleep(30);
+      }
     }
     
     // fragments the message data into fields.
     char *msg_Data[3] = {
-      get_Src(buffer_matrix[index]), // src.
-      get_Dst(buffer_matrix[index]), // dst.
-      get_Msg(buffer_matrix[index]) // msg.
+      get_Src(buffer_matrix[index]), // src
+      get_Dst(buffer_matrix[index]), // dst
+      get_Msg(buffer_matrix[index]) // msg
     };
 
     // checks if any of the fields is null, and execute bot commands.
@@ -379,7 +397,11 @@ bot_Nick(char *nick)
   snprintf(datas[1], BOT_MAX_LEN, "USER %s %s %s %s\r\n", nick, nick, nick, nick);
 
   msg_Send(datas[0]);
-  msg_Send(datas[1]);
+  
+  if(!user_flag) {
+    msg_Send(datas[1]);
+    user_flag = 1;
+  }
 
   matrix_Destroy(datas, 2);
 }
