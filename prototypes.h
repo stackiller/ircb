@@ -52,8 +52,8 @@ typedef struct {
   int reconnect;
 } irc_d;
 
-void *check_Timeout(void*);
-void* thread_recv(void *);
+void *check_Timeout(void*); // check timeout.
+void* thread_recv(void *); // thread to r_Buffer.
 
 /* Function prototypes */
 SSL_CTX* init_Ctx(void); // initializes a new ssl context.
