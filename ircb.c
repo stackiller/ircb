@@ -14,6 +14,7 @@
 #include <pthread.h>
 
 #include <netdb.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 
 #include <openssl/ssl.h>
@@ -88,7 +89,6 @@ main(int n_args, char *s_args[])
 void
 thread_recv_cleanup(void *unsed)
 {
-  puts("Inside thread_recv_cleanup");
   if(irc.buffer_matrix_size > 0) {
     matrix_Destroy(irc.buffer_matrix, irc.buffer_matrix_size);
   }
