@@ -1,36 +1,48 @@
 /* Creates a new socket connection. */
 int
-new_conn(const char *hostname, int port)
+new_conn(const char *hostname, const char *port)
 {
-  static struct sockaddr_in server; // struct sockaddr_in.
-  struct hostent *host; // struct hostent.
-  int sockfd; // socket descriptor.
+  int sockfd, s;
+  struct addrinfo *res, *next, hints;
+  res = addri;
+  next = addri_next;
 
-  // get ipv4 address by hostname.
-  if((host = gethostbyname(hostname)) == NULL) {
-    printf("(%s*%s%s) Invalid address: %s\n", fYellow, fBlink, fRs, hostname);
+  // hints for addrinfo.
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_flags |= AI_NUMERICSERV | AI_ADDRCONFIG;
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_addrlen = 0;
+  hints.ai_protocol = 0;
+  hints.ai_canonname = NULL;
+  hints.ai_addr = NULL;
+  hints.ai_next = NULL;
+
+  // get address of hostname.
+  s = getaddrinfo(hostname, port, &hints, &res);
+  if(s < 0) {
     return -1;
   }
 
-  // creates a TCP/IP socket.
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  // create ipv4 socket.
+  for(next = res; next != NULL; next = next->ai_next) {
+    sockfd = socket(next->ai_family, next->ai_socktype, next->ai_protocol);
+    if(sockfd > 0) {
+      break;
+    }
+  }
+  freeaddrinfo(res);
+
+  // exit if socket fails.
   if(sockfd < 0) {
-    free(host);
     perror("new_conn");
     return -1;
   }
- 
-  // assigns the connection data to the fields.
-  server.sin_family = AF_INET; 
-  server.sin_port = htons(port);
-  server.sin_addr.s_addr = *(long*)(host->h_addr);
-  memset(&server.sin_zero, 0x0, 8);
 
   // connects to the IRC server.
-  if((connect(sockfd, (struct sockaddr*) &server, sizeof(server))) != 0) {
-    free(host);
+  if((connect(sockfd, next->ai_addr, next->ai_addrlen)) != 0) {
+    printf("(%s*%s%s) Invalid address: %s\n", fYellow, fBlink, fRs, hostname);
     close(sockfd);
-    perror("new_conn");
     return -1;
   }
 
@@ -40,7 +52,6 @@ new_conn(const char *hostname, int port)
   // initializes the ssl connection to the IRC server.
   if(SSL_connect(irc.ssl) == 0)
   {
-    free(host);
     close(sockfd);
     ERR_print_errors_fp(stderr);
     return -1;
@@ -52,6 +63,7 @@ new_conn(const char *hostname, int port)
       fGreen, fBlink, fRs, SSL_get_cipher(irc.ssl));
   }
   show_Certs(irc.ssl); // show certificates.
+  
   return sockfd;
 }
 
@@ -108,7 +120,7 @@ int init_conn(irc_d *irc)
   irc->ssl = SSL_new(irc->ctx);
   
   /* keep trying to create a new connection until successul. */
-  while((irc->sockfd = new_conn(irc->host, atoi(irc->port))) < 0) {
+  while((irc->sockfd = new_conn(irc->host, irc->port)) < 0) {
     sleep(10);
   }
 
