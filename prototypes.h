@@ -59,7 +59,7 @@ void* thread_recv(void *); // thread to r_Buffer.
 SSL_CTX* init_Ctx(void); // initializes a new ssl context.
 void show_Certs(SSL*); // show ssl certificates.
 
-int new_conn(const char*, int); // creates a socket.
+int new_conn(const char*, const char*); // creates a socket.
 int init_conn(irc_d *); // init connection.
 int end_conn(irc_d *); // end connection.
 int recon_conn(irc_d*); // reconnect connection.
@@ -111,6 +111,9 @@ void usage(char*); // helps user.
 
 // Static control variables.
 int user_flag = 0; 
+
+// Variables used in new_conn.
+struct addrinfo *addri, *addri_next;
 
 // Sizes.
 #define BUFFER_MAX_SIZE 512 * 10
