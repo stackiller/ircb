@@ -145,5 +145,4 @@ void
 global_variables_reset(void)
 {
   user_flag = 0;
-  freeaddrinfo(addri_next);
 }
