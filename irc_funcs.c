@@ -422,7 +422,7 @@ void
 bot_Join(char *chans)
 {
   char *join = (char*) calloc(BOT_MAX_LEN*2, 1);
-  snprintf(join, BOT_MAX_LEN, "JOIN %s\r\n", chans);
+  snprintf(join, BOT_MAX_LEN*2, "JOIN %s\r\n", chans);
   msg_Send(join);
   free(join);
 }
