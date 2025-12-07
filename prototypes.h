@@ -76,6 +76,7 @@ void null_safe_release(void *ptr); // releases a pointer with null safety.
 void global_variables_reset(void); // reset global control variables.
 
 void matrix_Destroy(char **, int); // destroys a matrix.
+void matrix_stack_Destroy(char **, int); // destroys a matrix elements refered in stack.
 void read_matrix_Buffer(char**, int); // Reads the matrix buffer.
 
 char** matrix_Alloc(int); // allocates matrix buffer.

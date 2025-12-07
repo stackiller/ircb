@@ -91,15 +91,20 @@ matrix_Alloc(int size)
 char**
 matrix_Realloc(char **matrix, int size)
 {
-  char **new_matrix = (char**) reallocarray(matrix, size, sizeof(char*));
+  // char **new_matrix = (char**) reallocarray(matrix, size, sizeof(char*));
+  char **new_matrix = (char**) realloc(matrix, size * sizeof(char*));
 
   if ( new_matrix == NULL ) {
     printf("Fail to reallocate the matrix size.\n");
-    matrix_Destroy(matrix, size);
     return NULL;
   }
 
   new_matrix[size-1] = (char*) calloc(BUFFER_MAX_LINE_SIZE, 1);
+
+  if (new_matrix[size - 1] == NULL) {
+    printf("Fail to allocate new matrix row.\n");
+    return NULL;
+  }
 
   return new_matrix;
 }
@@ -109,7 +114,16 @@ void
 matrix_Destroy(char **matrix, int size)
 {
   for(int i=0; i < size; i++)
-    free(matrix[i]);
+    null_safe_release(matrix[i]);
+  null_safe_release(matrix);
+}
+
+/* Matrix stack destroyer. */
+void
+matrix_stack_Destroy(char **matrix, int size)
+{
+  for(int i=0; i < size; i++)
+    null_safe_release(matrix[i]);
 }
 
 /* Reads the matrix buffer. */
