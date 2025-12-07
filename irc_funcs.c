@@ -177,6 +177,7 @@ get_Src(char *lbuffer)
     return NULL;
   }
 
+  free(lbuffer_copy);
   return src;
 }
 
@@ -276,6 +277,7 @@ get_nArg(char *lbuffer, int n_arg_index)
           return NULL;
         }
       }
+      free(lbuffer_copy);
       return n_arg;
     }
     else if(lbuffer_copy[i] == 32) {
@@ -311,6 +313,7 @@ get_Args(char *lbuffer)
           return NULL;
         }
       }
+      free(lbuffer_copy);
       return args;
     }
     else if(lbuffer_copy[i] == 32) k++;
