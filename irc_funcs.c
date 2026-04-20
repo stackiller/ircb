@@ -25,13 +25,14 @@ r_Buffer(int *buffer_matrix_size)
 
   // reads the data and concatenates it into the buffer.
   do {
-    bytes = SSL_read(irc.ssl, buffer_lines, BUFFER_MAX_LINE_SIZE);
+    bytes = SSL_read(irc.ssl, buffer_lines, BUFFER_MAX_LINE_SIZE - 1);
 
     if(bytes <= 0) {
       matrix_stack_Destroy((char*[]){buffer, buffer_lines}, 2);
       return NULL;
     }
     tBytes += bytes;
+    buffer_lines[bytes] = '\0';
 
     strcat(buffer, buffer_lines);
     memset(buffer_lines, '\0', BUFFER_MAX_LINE_SIZE);
@@ -49,10 +50,11 @@ r_Buffer(int *buffer_matrix_size)
   }
 
   int index = 0;
-  do
+  while(index < *buffer_matrix_size)
   {
     // responds to ping
     if((bot_Pong(buffer_matrix[index])) == 0) {
+      free(buffer);
       return buffer_matrix;
     }
 
@@ -103,7 +105,7 @@ r_Buffer(int *buffer_matrix_size)
       null_safe_release(msg_Data[x]);
 
     index++;
-  } while(index < *buffer_matrix_size);
+  }
 
   free(buffer);
   return buffer_matrix;
@@ -126,21 +128,31 @@ format_Buffer(char *buffer, int *ret_size)
   strcpy(buffer_copy, buffer);
 
   char *token = strtok(buffer_copy, "\r\n");
+  if(token == NULL) {
+    *ret_size = 0;
+    free(buffer_copy);
+    matrix_Destroy(f_buffer, 1);
+    return NULL;
+  }
+
   while(token != NULL)
   {
     strcpy(f_buffer[i], token);
     i++;
-    f_buffer_tmp = matrix_Realloc(f_buffer, i+1);
-
-    if(checkNull(f_buffer_tmp)) {
-      *ret_size = 0;
-      free(buffer_copy);
-      matrix_Destroy(f_buffer, i);
-      return NULL;
-    }
-    
-    f_buffer = f_buffer_tmp;
     token = strtok(NULL, "\r\n");
+
+    if (token != NULL) {
+      f_buffer_tmp = matrix_Realloc(f_buffer, i+1);
+
+      if(checkNull(f_buffer_tmp)) {
+        *ret_size = 0;
+        free(buffer_copy);
+        matrix_Destroy(f_buffer, i);
+        return NULL;
+      }
+      
+      f_buffer = f_buffer_tmp;
+    }
   }
   
   *ret_size = i;
@@ -172,6 +184,7 @@ get_Src(char *lbuffer)
   }
 
   do {
+    if (lbuffer_copy[i] == '\0') break;
     src[j] = lbuffer_copy[i];
     i++; j++;
   } while(lbuffer_copy[i] != limit && i < 30);
@@ -192,14 +205,14 @@ get_Dst(char *lbuffer)
   int privmsg_bool = 0;
   
   char *lbuffer_copy = (char*) calloc(strlen(lbuffer) + 1, 1);
-  char *dst = (char*) calloc(50, 1);
+  char *dst;
 
   char *Privmsg_flag = get_nArg(lbuffer, 1);
   privmsg_bool = str_Cmp(Privmsg_flag, "PRIVMSG");
   null_safe_release(Privmsg_flag);
 
   if(!privmsg_bool) {
-    matrix_stack_Destroy((char*[]){ lbuffer_copy, dst }, 2);
+    matrix_stack_Destroy((char*[]){ lbuffer_copy }, 1);
     return NULL;
   }
 
@@ -209,7 +222,7 @@ get_Dst(char *lbuffer)
     dst = get_nArg(lbuffer_copy, 2);
 
     if(checkNull(dst)) {
-      matrix_stack_Destroy((char*[]){ lbuffer_copy, dst }, 2);
+      matrix_stack_Destroy((char*[]){ lbuffer_copy }, 1);
       return NULL;
     }
   }

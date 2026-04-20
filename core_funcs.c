@@ -22,6 +22,8 @@ int checkNull(void *ptr) { return ptr == NULL ? true : false; }
 int
 str_Cmp(char *d1, char *d2)
 {
+  if(d1 == NULL || d2 == NULL) return(0);
+
   if(strcmp(d2, d1) == 0) return(1);
   else return(0);
 }
